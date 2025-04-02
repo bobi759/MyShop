@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    <body class="bg-light">
+    <div class="container mt-5">
+        <div class="card mx-auto" style="max-width: 500px;">
+            <div class="card-header text-center bg-primary text-white">
+                <h4>User Profile</h4>
+            </div>
+            <div class="card-body text-center">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle mb-3"
+                         width="150" height="150">
+                {% else %}
+                    <img src="https://via.placeholder.com/150" alt="Default Profile Picture"
+                         class="rounded-circle mb-3">
+                {% endif %}
+                <h5 class="card-title">{{ profile.first_name }} {{ profile.last_name }}</h5>
+                <h5 class="card-title">Username: {{ profile.user.email }}</h5>
+
+                <p class="card-text"><strong>Age:</strong> {{ profile.age }}</p>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

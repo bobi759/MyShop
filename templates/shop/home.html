@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load custom_tags %}
+{% load static %}
+
+
+{#<div class="container-fluid d-flex align-items-center justify-content-center" style="height:100vh;">#}
+{#    <div class="row align-items-center w-100">#}
+{#        <div class="col-md-6 text-start px-5">#}
+{#            <h1 class="display-4 fw-bold">Give Your Workout A New Style!</h1>#}
+{#            <p class="lead">Success isn't always about greatness. It's about consistency. Consistent hard work gains success. Greatness will come.</p>#}
+{#            <a href="#" class="btn btn-danger btn-lg mt-3">Explore Now →</a>#}
+{#        </div>#}
+{##}
+{#        <!-- Right Side: Image Content -->#}
+{#        <div class="col-md-6 text-center">#}
+{#            <img src="{% static 'images/soccer-players.png' %}" alt="Soccer Players" class="img-fluid" style="max-height: 500px;">#}
+{#        </div>#}
+{#    </div>#}
+{#</div>#}
+
+{% block body-class %}radial-gradient-bg{% endblock %}
+
+{#{% block body-class %}hope-page{% endblock %}#}
+
+
+{% block content %}
+    <div class="container col-xxl-8 px-4 py-5">
+        <div class="row align-items-center g-5 py-5">
+            <!-- Text Column (First) -->
+            <div class="col-lg-6 text-center text-lg-start">
+                <div class="content-wrapper mx-auto">
+                    <h1 class="display-5 fw-bold lh-1 mb-4">One Bookshop, Endless Adventures!</h1>
+                    <p class="lead mb-4">Knowledge isn’t built in a day. It grows with every book you read. Build your
+                        future, one book at a time. Start your collection now!</p>
+                    <a href="{% url 'products' %}"
+                       class="btn btn-lg px-4 fw-semibold text-white rounded-pill shadow-lg bg-danger">
+                        Explore Now →
+                    </a>
+
+                </div>
+            </div>
+            <!-- Image Column (Second) -->
+            <div class="col-lg-6 text-center">
+                <img src="{% static 'img/book-enter.png' %}" class="d-block mx-auto img-fluid" alt="Books" width="400"
+                     height="400" loading="lazy">
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}{% endblock %}
+

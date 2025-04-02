@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load widget_tweaks %}
+
+{% block content %}
+<div class="container mt-5 d-flex justify-content-center">
+    <div class="card shadow-sm w-100" style="max-width: 500px;">
+        <div class="card-body">
+            <h3 class="card-title mb-4 text-center">Register</h3>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    {{ form.email.label_tag }}
+                    {{ form.email|add_class:"form-control" }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.password1.label_tag }}
+                    {{ form.password1|add_class:"form-control" }}
+                    <div class="form-text">
+                        Your password must contain at least 8 characters, not be too common, etc.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.password2.label_tag }}
+                    {{ form.password2|add_class:"form-control" }}
+                    <div class="form-text">
+                        Enter the same password as before, for verification.
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    {{ form.first_name.label_tag }}
+                    {{ form.first_name|add_class:"form-control" }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.last_name.label_tag }}
+                    {{ form.last_name|add_class:"form-control" }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.age.label_tag }}
+                    {{ form.age|add_class:"form-control" }}
+                </div>
+
+                <div class="mb-3">
+                    {{ form.profile_picture.label_tag }}
+                    {{ form.profile_picture|add_class:"form-control" }}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

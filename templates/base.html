@@ -1,0 +1,118 @@
+{% load static %}
+{% load custom_tags %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Navbar</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+
+</head>
+<body class="{% block body-class %}default-bg{% endblock %}">
+
+<nav class="navbar navbar-expand-lg navbar-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'home page' %}">MyShop</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item"><a class="nav-link" href="{% url 'home page' %}">Home</a></li>
+                {#                <li class="nav-item"><a class="nav-link" href="{% url 'products' %}">Products</a></li>#}
+
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">Books</a>
+                    <ul class="dropdown-menu text-start" aria-labelledby="navbarDropdown">
+                        <li><a class="dropdown-item" href="{% url 'products' %}">All books</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        {% for genre in genres %}
+                            <li><a class="dropdown-item"
+                                   href="{% url 'filtered products' genre.name %}">{{ genre.name }}</a></li>
+                        {% endfor %}
+
+
+                    </ul>
+                </li>
+
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false">
+                        {% if user.is_authenticated %}
+                            {{ user.profile.first_name }}
+                        {% else %}
+                            Account
+                        {% endif %}
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
+                        {% if user.is_authenticated %}
+                            <li><a class="dropdown-item" href="{% url 'profile details' request.user.id %}">Profile
+                                Details</a></li>
+                            <li><a class="dropdown-item" href="{% url 'edit profile' request.user.id %}">Edit
+                                Profile</a></li>
+
+                            <li><a class="dropdown-item" href="{% url 'logout profile' %}">Logout</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'delete profile' request.user.id %}">Delete
+                                Profile</a></li>
+                        {% else %}
+                            <li><a class="dropdown-item" href="{% url 'login profile' %}">Login</a></li>
+                            <li><a class="dropdown-item" href="{% url 'create profile' %}">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </li>
+                {#                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>#}
+                {#                <li class="nav-item"><a class="nav-link" href="#">Account</a></li>#}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'order' %}">
+                        <i class="bi bi-bag"></i> <!-- Bootstrap shopping bag icon -->
+                    </a>
+                </li>
+
+
+            </ul>
+        </div>
+    </div>
+</nav>
+
+{% block content %}
+{% endblock %}
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+{#TODO Sticky Footer#}
+{% block footer %}
+    <div class="container">
+        <footer class="py-3 my-4">
+            <ul class="nav justify-content-center border-bottom pb-3 mb-3">
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Home</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Contact</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">FAQs</a></li>
+                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">About</a></li>
+            </ul>
+            <p class="text-center text-body-secondary">© 2024 Company, Inc</p>
+        </footer>
+    </div>
+{% endblock %}
+</html>
+
+
+
