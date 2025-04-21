@@ -2,7 +2,6 @@ from django.contrib.auth.mixins import UserPassesTestMixin
 from django.views import View
 
 
-#TODO USE MIDDLEWARE ???
 class NotAuthenticatedUser(UserPassesTestMixin):
 
     def __init__(self):

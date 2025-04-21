@@ -1,4 +1,5 @@
 import time
+import uuid
 
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
@@ -14,7 +15,6 @@ class Genre(models.Model):
 
     name = models.CharField(
         max_length=NAME_MAX_LENGTH,
-        unique=True,
     )
 
     def __str__(self):
@@ -89,14 +89,21 @@ class Profile(models.Model):
         return f"{self.first_name} {self.last_name}"
 
 
-#
-# class Order(models.Model):
-#
-#     customer = models.ForeignKey(
-#         Profile,
-#         on_delete=CASCADE,
-#     )
-#
-#
+class Cart(models.Model):
 
+    id = models.UUIDField(default=uuid.uuid4,editable=False,primary_key=True)
+
+    def __str__(self):
+        return str(self.id)
+
+
+class CartItem(models.Model):
+
+    cart = models.ForeignKey(Cart,on_delete=models.CASCADE,related_name='items')
+    product = models.ForeignKey(Book,on_delete=models.CASCADE,related_name='item_products')
+    quantity = models.PositiveIntegerField(default=1)
+
+
+    def __str__(self):
+        return f"{self.product.title} added to {self.cart.id}"
 

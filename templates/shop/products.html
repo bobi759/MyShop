@@ -3,48 +3,68 @@
 {% block content %}
 
 
-{#    <style>#}
-{#        .card-img-top {#}
-{#            width: 50%; /* Ensures the image takes full card width */#}
-{#            height: 250px; /* Consistent height */#}
-{#            object-fit: cover; /* Prevents distortion */#}
-{#            display: block; /* Removes extra spacing */#}
-{#            margin: 0 auto; /* Centers image */#}
-{#        }#}
-{#    </style>#}
+            <style>
+                .card-img-top {
+                    width: 50%; /* Ensures the image takes full card width */
+                    height: 250px; /* Consistent height */
+                    object-fit: cover; /* Prevents distortion */
+                    display: block; /* Removes extra spacing */
+                    margin: 0 auto; /* Centers image */
+                }
+            </style>
 
     <div class="container my-5">
         <h2 class="fw-bold pb-5">All Products</h2>
         <div class="row">
-            {% for book in books %}
-            <!-- Sample Product 1 -->
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0">
-                    <a href="{% url 'product detail' book.id %}"><img src="{{ book.image.url }}" class="card-img-top" alt="HTML tutorial"></a>
-{#                    <img src="{{ book.image.url }}" class="card-img-top"#}
-{#                         alt="Red Printed T-Shirt">#}
-                    <div class="card-body text-center">
-                        <h5 class="card-title">{{ book.title }}</h5>
 
-                        <p class="text-warning">⭐⭐⭐⭐☆</p>
-                        <p class="fw-bold">${{ book.price|floatformat:2 }}</p>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+
+    <script>
+
+        $.ajax({
+            type: "GET",
+            url: "http://localhost:8000/api/book/",
+            success: (data) => {
+                console.log(data)
+                data.forEach(book => {
+                    renderBookCards(book)
+                })
+            },
+            error: (error) => {
+                console.log(error)
+            }
+        });
+
+        function renderBookCards(book) {
+
+            const productDetailBaseUrl = "{% url 'product detail' 0 %}".replace("0/", "");
+            let detailUrl = `${productDetailBaseUrl}${book.id}/`;
+
+
+            let emptyCard = `
+                    <div class="col-md-3 col-sm-6">
+                    <div class="card border-0" >
+                        <a href="${detailUrl}"><img src="${book.image}"
+                                                                          class="card-img-top" alt="HTML tutorial"></a>
+                        {#                    <img src="{{ book.image.url }}" class="card-img-top"#}
+                        {#                         alt="Red Printed T-Shirt">#}
+                        <div class="card-body text-center">
+                            <h5 class="card-title">${book.title}</h5>
+
+                            <p class="text-warning">⭐⭐⭐⭐☆</p>
+                            <p class="fw-bold">${book.price}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
-            {% endfor %}
-            <!-- Sample Product 1 -->
-{#            <div class="col-md-3 col-sm-6">#}
-{#                <div class="card border-0">#}
-{#                    <img src="https://images2.penguinrandomhouse.com/cover/9780593457917" class="card-img-top"#}
-{#                         alt="Red Printed T-Shirt">#}
-{#                    <div class="card-body text-center">#}
-{#                        <h5 class="card-title">Red Printed T-Shirt</h5>#}
-{##}
-{#                        <p class="text-warning">⭐⭐⭐⭐☆</p>#}
-{#                        <p class="fw-bold">$50.00</p>#}
-{#                    </div>#}
-{#                </div>#}
-{#            </div>#}
+                `;
+            $(".row").append(emptyCard);
 
+        }
+
+    </script>
 {% endblock %}
 

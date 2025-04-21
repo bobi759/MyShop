@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
+    
 
 </head>
 <body class="{% block body-class %}default-bg{% endblock %}">
@@ -80,7 +80,7 @@
                 {#                <li class="nav-item"><a class="nav-link" href="#">Account</a></li>#}
 
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'order' %}">
+                    <a class="nav-link" href="{% url 'order products' %}">
                         <i class="bi bi-bag"></i> <!-- Bootstrap shopping bag icon -->
                     </a>
                 </li>
@@ -95,6 +95,7 @@
 {% endblock %}
 
 <!-- Bootstrap JS -->
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
