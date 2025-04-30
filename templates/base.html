@@ -1,5 +1,4 @@
 {% load static %}
-{% load custom_tags %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -12,8 +11,9 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
 
+
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-    
+
 
 </head>
 <body class="{% block body-class %}default-bg{% endblock %}">
@@ -34,17 +34,12 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">Books</a>
-                    <ul class="dropdown-menu text-start" aria-labelledby="navbarDropdown">
+                    <ul class="dropdown-menu text-start" aria-labelledby="navbarDropdown" id="genre-list">
                         <li><a class="dropdown-item" href="{% url 'products' %}">All books</a></li>
                         <li>
                             <hr class="dropdown-divider">
                         </li>
-                        {% for genre in genres %}
-                            <li><a class="dropdown-item"
-                                   href="{% url 'filtered products' genre.name %}">{{ genre.name }}</a></li>
-                        {% endfor %}
-
-
+                        <!-- Dynamic genres will be added here -->
                     </ul>
                 </li>
 
@@ -97,6 +92,35 @@
 <!-- Bootstrap JS -->
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<script>
+
+    function AddGenreToNavbar(genreName) {
+        let listItem = $('<li class="nav-item">');
+        let link = $('<a class="dropdown-item" href="/products/?genre=' + genreName + '">')
+            .text(genreName);
+        listItem.append(link);
+        $('#genre-list').append(listItem);
+    }
+
+    $.ajax({
+        type: 'GET',
+        url: 'http://localhost:8000/api/genre/',
+        success: function (data) {
+            data.forEach(genre => {
+                AddGenreToNavbar(genre.name);
+            })
+        },
+        error: function (xhr, textStatus, errorThrown) {
+            alert('Error Msg: ' + errorThrown);
+        }
+    });
+
+
+</script>
+
 </body>
 
 {#TODO Sticky Footer#}

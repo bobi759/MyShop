@@ -1,6 +1,13 @@
+from attr import dataclass
+from django.contrib.auth import get_user_model
+from django.contrib.auth.password_validation import validate_password
+from django.db.models import Model
 from rest_framework import serializers
-from Shop.shop_app.models import Genre, Book, Cart, CartItem
+from rest_framework.fields import ImageField
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.serializers import ModelSerializer
 
+from Shop.shop_app.models import Genre, Book, Cart, CartItem, Profile
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -39,6 +46,7 @@ class CartItemListSerializer(serializers.ModelSerializer):
     @staticmethod
     def total(cart_item: CartItem):
         return cart_item.product.price * cart_item.quantity
+
 
 class CartItemCreateSerializer(serializers.ModelSerializer):
 
@@ -89,3 +97,53 @@ class CartSerializer(serializers.ModelSerializer):
     def final_total(cart):
         return sum(item.product.price * item.quantity for item in cart.items.all())
 
+
+User = get_user_model()
+
+
+class ProfileSerializer(ModelSerializer):
+
+    profile_picture = ImageField()
+
+    class Meta:
+        model = Profile
+        fields = ("first_name","last_name","age","profile_picture")
+
+class UserSerializer(ModelSerializer):
+
+    profile = ProfileSerializer(many=False)
+    password2 = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = User
+        fields = ("id","email","password","password2","profile",)
+        extra_kwargs = {
+            "password": {"write_only": True}
+        }
+
+    def create(self, validated_data):
+        profile_data = validated_data.pop('profile')
+        password = validated_data.pop('password')
+        validated_data.pop('password2', None)
+
+
+        user = User(**validated_data)
+        user.set_password(password)
+        user.save()
+        Profile.objects.create(user=user, **profile_data)
+        return user
+
+    def validate(self, attrs):
+        password = attrs.get('password')
+        password2 = attrs.get('password2',None)
+
+        profile_data = attrs.get('profile')
+
+        if password != password2:
+            raise serializers.ValidationError("Passwords do not match.")
+
+        validate_password(password)
+        #
+        profile_serializer = ProfileSerializer(data=profile_data)
+        profile_serializer.is_valid(raise_exception=True)
+        return attrs

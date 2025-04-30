@@ -15,6 +15,7 @@
 
 a {
     text-decoration: none!important;
+
 }
 
 .w-xl {
@@ -42,4 +43,9 @@ a {
     background-clip: border-box;
     border: 1px solid #eff0f2;
     border-radius: 1rem;
+}
+
+a {
+    color: black !important; /* Force links to be black */
+    text-decoration: none;
 }

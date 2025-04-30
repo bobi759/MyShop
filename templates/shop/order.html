@@ -23,13 +23,15 @@
 
                 <div class="row my-4">
                     <div class="col-sm-6">
-                        {#                        <a href="ecommerce-products.html" class="btn btn-link text-muted"></a>#}
-                        <i class="mdi mdi-arrow-left me-1"></i> Continue Shopping
+                        <a href="{% url 'products' %}" class="btn btn-link text-muted">
+                            <i class="mdi mdi-arrow-left me-1"></i> Continue Shopping
+                        </a>
                     </div> <!-- end col -->
                     <div class="col-sm-6">
                         <div class="text-sm-end mt-2 mt-sm-0">
-                            {#                            <a href="ecommerce-checkout.html" class="btn btn-success"></a>#}
-                            <i class="mdi mdi-cart-outline me-1"></i> Checkout
+                            <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" title="Proceed to Checkout">
+                                <i class="mdi mdi-cart-outline me-2"></i> Proceed to Checkout
+                            </a>
                         </div>
                     </div> <!-- end col -->
                 </div> <!-- end row-->
@@ -75,7 +77,6 @@
                             </div>
                             <!-- end table-responsive -->
                         </div>
-                        <button onclick="">GET ALL BOOK NAMES</button>
                     </div>
                 </div>
             </div>
@@ -83,9 +84,6 @@
 
 
        <!-- Button trigger modal -->
-<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-  Launch demo modal
-</button>
 
 <!-- Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -134,8 +132,10 @@
                     "X-CSRFToken": $crf_token,
                     "Content-Type": "application/json",
                 },
-                success: () =>  {
+                success: (data) =>  {
+                    console.log(data);
                     $(`#cart-item-${item_id}`).parent().remove();
+                    $(".text-end .fw-bold").text(`$${(data.new_total_price).toFixed(2)}`);
                 },
                 error: (error) => {
                     console.log(error);
@@ -154,7 +154,6 @@
                 url: "http://localhost:8000/api/cart/e75d8bc5-815c-4c39-a0c7-df5c7915fb8f/",
                 success: (data) => {
 
-                    console.log(data);
                     let books = data.items
                     
                     books.forEach(item => {

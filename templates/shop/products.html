@@ -3,15 +3,15 @@
 {% block content %}
 
 
-            <style>
-                .card-img-top {
-                    width: 50%; /* Ensures the image takes full card width */
-                    height: 250px; /* Consistent height */
-                    object-fit: cover; /* Prevents distortion */
-                    display: block; /* Removes extra spacing */
-                    margin: 0 auto; /* Centers image */
-                }
-            </style>
+    <style>
+        .card-img-top {
+            width: 50%; /* Ensures the image takes full card width */
+            height: 250px; /* Consistent height */
+            object-fit: cover; /* Prevents distortion */
+            display: block; /* Removes extra spacing */
+            margin: 0 auto; /* Centers image */
+        }
+    </style>
 
     <div class="container my-5">
         <h2 class="fw-bold pb-5">All Products</h2>
@@ -25,9 +25,16 @@
 
     <script>
 
+        let url_string = window.location.href
+        let url = new URL(url_string);
+        let genre = url.searchParams.get("genre");
+
         $.ajax({
             type: "GET",
             url: "http://localhost:8000/api/book/",
+            data: {
+                "genre": genre,
+            },
             success: (data) => {
                 console.log(data)
                 data.forEach(book => {

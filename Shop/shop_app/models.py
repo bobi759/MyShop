@@ -74,7 +74,7 @@ class Profile(models.Model):
         max_length= LAST_NAME_MAX_LENGTH
     )
 
-    age = models.IntegerField()
+    age = models.IntegerField(validators=[MinValueValidator(0),])
 
     profile_picture = models.ImageField()
 
@@ -92,6 +92,12 @@ class Profile(models.Model):
 class Cart(models.Model):
 
     id = models.UUIDField(default=uuid.uuid4,editable=False,primary_key=True)
+
+    @property
+    def total_price(self):
+        return sum(
+            item.product.price * item.quantity for item in self.items.all()
+        )
 
     def __str__(self):
         return str(self.id)

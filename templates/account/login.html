@@ -22,6 +22,9 @@
 
                 <button type="submit" class="btn btn-primary w-100">Login</button>
             </form>
+            <br>
+            <button type="submit" onclick="loginFunc()" class="btn btn-primary w-100">TEST LOGIN</button>
+
 
             <div class="text-center mt-3">
                 <small>Don't have an account?
@@ -31,4 +34,32 @@
         </div>
     </div>
 </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+
+    function loginFunc() {
+        $.ajax({
+        url : 'http://localhost:8000/api/login/',
+        type : 'POST',
+        data : {
+            "email": "test@abv.bg",
+            "password": "123"
+        },
+        success : function(data) {
+            console.log(data);
+            window.location.href = 'http://localhost:8000/';
+        },
+        error : function(xhr, status, error)
+        {
+            console.log(xhr.status);
+            console.log(error);
+        }
+    });
+    }
+
+    
+    
+    </script>
 {% endblock %}

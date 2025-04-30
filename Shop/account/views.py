@@ -1,36 +1,43 @@
-from django.contrib.auth import login, logout
+from django.contrib.auth import login, logout, get_user_model
+from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, DetailView, DeleteView
+from django.views.generic import CreateView, UpdateView, DetailView, DeleteView, TemplateView
 from django.contrib.auth.views import LoginView, LogoutView
+from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from Shop.account.forms import CreateProfileForm, EditProfileForm
 from Shop.account.test_funcions import NotAuthenticatedUser, OwnProfileAccessMixin
 from Shop.shop_app.models import Profile
 
 
+import jwt
+import datetime
 
-# TODO Edit username, change password,
+User = get_user_model()
 
-# DONE - Register, Login, Logout, Edit, ProfileDetails, DeleteProfile
 
-class CreateProfile(NotAuthenticatedUser, CreateView):
+class CreateProfile(NotAuthenticatedUser, TemplateView):
 
-    form_class = CreateProfileForm
     template_name = 'account/register.html'
-    success_url = reverse_lazy('home page')
 
-    def form_valid(self, form):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["form"] = CreateProfileForm
+        return context
 
-        response = super().form_valid(form)
-        user = form.save()
-        login(self.request,user)
-        return response
-
-class LoginUser(NotAuthenticatedUser,LoginView):
+class LoginUser(NotAuthenticatedUser,TemplateView):
 
    template_name = 'account/login.html'
+
+   def get_context_data(self, **kwargs):
+       context = super().get_context_data(**kwargs)
+       context["form"] = AuthenticationForm
+       return context
+
 
 
 class LogoutUser(LogoutView):
@@ -60,4 +67,6 @@ class DeleteProfile(OwnProfileAccessMixin,DeleteView):
         self.object.delete()
         logout(self.request)
         return redirect(self.success_url)
+
+
 
