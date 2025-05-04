@@ -10,11 +10,7 @@
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
-
-
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
-
-
 </head>
 <body class="{% block body-class %}default-bg{% endblock %}">
 
@@ -28,8 +24,6 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto">
                 <li class="nav-item"><a class="nav-link" href="{% url 'home page' %}">Home</a></li>
-                {#                <li class="nav-item"><a class="nav-link" href="{% url 'products' %}">Products</a></li>#}
-
 
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
@@ -46,41 +40,17 @@
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="accountDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">
-                        {% if user.is_authenticated %}
-                            {{ user.profile.first_name }}
-                        {% else %}
-                            Account
-                        {% endif %}
+                        <span id="username-display" style="visibility: hidden;">Account</span>
                     </a>
-                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown">
-                        {% if user.is_authenticated %}
-                            <li><a class="dropdown-item" href="{% url 'profile details' request.user.id %}">Profile
-                                Details</a></li>
-                            <li><a class="dropdown-item" href="{% url 'edit profile' request.user.id %}">Edit
-                                Profile</a></li>
-
-                            <li><a class="dropdown-item" href="{% url 'logout profile' %}">Logout</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item text-danger" href="{% url 'delete profile' request.user.id %}">Delete
-                                Profile</a></li>
-                        {% else %}
-                            <li><a class="dropdown-item" href="{% url 'login profile' %}">Login</a></li>
-                            <li><a class="dropdown-item" href="{% url 'create profile' %}">Register</a></li>
-                        {% endif %}
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="accountDropdown" id="account-menu">
                     </ul>
                 </li>
-                {#                <li class="nav-item"><a class="nav-link" href="#">Contact</a></li>#}
-                {#                <li class="nav-item"><a class="nav-link" href="#">Account</a></li>#}
 
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'order products' %}">
-                        <i class="bi bi-bag"></i> <!-- Bootstrap shopping bag icon -->
+                        <i class="bi bi-bag"></i>
                     </a>
                 </li>
-
-
             </ul>
         </div>
     </div>
@@ -90,40 +60,101 @@
 {% endblock %}
 
 <!-- Bootstrap JS -->
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode@3.1.2/build/jwt-decode.min.js"></script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+
 
 <script>
+    function getDecodedToken(cookieName) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${cookieName}=`);
 
-    function AddGenreToNavbar(genreName) {
-        let listItem = $('<li class="nav-item">');
-        let link = $('<a class="dropdown-item" href="/products/?genre=' + genreName + '">')
-            .text(genreName);
-        listItem.append(link);
-        $('#genre-list').append(listItem);
+        if (parts.length === 2) {
+            try {
+                const token = parts.pop().split(';').shift();
+                return jwt_decode(token);
+            } catch (error) {
+                console.warn("Failed to decode token:", error);
+            }
+        }
+
+        return null;
     }
 
-    $.ajax({
-        type: 'GET',
-        url: 'http://localhost:8000/api/genre/',
-        success: function (data) {
-            data.forEach(genre => {
-                AddGenreToNavbar(genre.name);
-            })
-        },
-        error: function (xhr, textStatus, errorThrown) {
-            alert('Error Msg: ' + errorThrown);
+    function renderAccountMenu(isAuthenticated, userId) {
+        const $menu = $('#account-menu');
+        $menu.empty();
+
+        if (isAuthenticated) {
+            $menu.append(`
+                <li><a class="dropdown-item" href="/account/details/${userId}">Profile Details</a></li>
+                <li><a class="dropdown-item" href="/account/edit/${userId}">Edit Profile</a></li>
+                <li><a class="dropdown-item" href="/account/logout/">Logout</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="/profile/delete/${userId}">Delete Profile</a></li>
+            `);
+        } else {
+            $menu.append(`
+                <li><a class="dropdown-item" href="/account/login/">Login</a></li>
+                <li><a class="dropdown-item" href="/account/register/">Register</a></li>
+            `);
+        }
+    }
+
+    $(document).ready(function () {
+        let decoded = getDecodedToken("token");
+
+        if (decoded) {
+            let user_id = decoded.user_id;
+
+            $.ajax({
+                url: `http://localhost:8000/api/user/${user_id}`,
+                method: "GET",
+                xhrFields: {
+                    withCredentials: true
+                },
+                success: function (data) {
+                    const username = data["email"];
+                    $('#username-display').text(username).css('visibility', 'visible');
+                    renderAccountMenu(true, user_id);
+                },
+                error: function () {
+                    $('#username-display').text("Account").css('visibility', 'visible');
+                    renderAccountMenu(false);
+                }
+            });
+        } else {
+            $('#username-display').text("Account").css('visibility', 'visible');
+            renderAccountMenu(false);
+        }
+
+        $.ajax({
+            type: 'GET',
+            url: 'http://localhost:8000/api/genre/',
+            success: function (data) {
+                data.forEach(genre => {
+                    AddGenreToNavbar(genre.name);
+                });
+            },
+            error: function (xhr, textStatus, errorThrown) {
+                alert('Error Msg: ' + errorThrown);
+            }
+        });
+
+        function AddGenreToNavbar(genreName) {
+            let listItem = $('<li class="nav-item">');
+            let link = $('<a class="dropdown-item" href="/products/?genre=' + genreName + '">').text(genreName);
+            listItem.append(link);
+            $('#genre-list').append(listItem);
         }
     });
-
-
 </script>
 
 </body>
 
-{#TODO Sticky Footer#}
 {% block footer %}
     <div class="container">
         <footer class="py-3 my-4">
@@ -138,6 +169,3 @@
     </div>
 {% endblock %}
 </html>
-
-
-

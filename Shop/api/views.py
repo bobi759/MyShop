@@ -1,10 +1,11 @@
-import time
-
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import AuthenticationFailed
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
-
+from Shop.api.authentication import CookieJWTAuthentication
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
     CartItemUpdateSerializer, CartRetrieveSerializer, UserSerializer
 
@@ -15,18 +16,12 @@ from Shop.api.serializers import CartItemListSerializer
 from Shop.shop_app.models import Book, CartItem, Genre, Cart
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
-import jwt
 import datetime
+from rest_framework import status
 
 
-class CustomResponse(Response):
+User = get_user_model()
 
-    def __init__(self,data=None,status_code=None,**kwargs):
-        data = {
-            'status_code': status_code,
-            'data': data,
-        }
-        super().__init__(data, **kwargs)
 
 
 class CartViewSet(ModelViewSet):
@@ -34,7 +29,6 @@ class CartViewSet(ModelViewSet):
     serializer_class = CartSerializer
 
 
-        # return CustomResponse(serializer.data, status_code=200)
 
 class CartItemsViewSet(ModelViewSet):
 
@@ -59,7 +53,6 @@ class CartItemsViewSet(ModelViewSet):
             return self.retrieve_serializer
 
 
-
     def destroy(self, request, *args, **kwargs):
         super().destroy(request,*args,**kwargs)
         cart_id = kwargs.get("cart_id_pk",None)
@@ -73,6 +66,8 @@ class CartItemsViewSet(ModelViewSet):
 
 class BookReadOnlyViewSet(ReadOnlyModelViewSet):
 
+    authentication_classes = []
+
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
@@ -82,8 +77,6 @@ class BookReadOnlyViewSet(ReadOnlyModelViewSet):
         # if new_query:
         #     return new_query
         # return self.queryset
-
-
 
 
 
@@ -110,75 +103,48 @@ class GenreReadOnlyViewSet(ReadOnlyModelViewSet):
     serializer_class = GenreSerializer
 
 
-User = get_user_model()
 
-class Register(APIView):
+class MyObtainTokenPairView(TokenObtainPairView):
+    permission_classes = [AllowAny]
+    serializer_class = TokenObtainPairSerializer
 
-    parser_classes = [MultiPartParser, FormParser,JSONParser]  # 👈 this is key
+    def post(self, request, *args, **kwargs):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        access = serializer.validated_data.get("access")
+        refresh = serializer.validated_data.get("refresh")
 
-    def get(self,request):
-        user = User.objects.all()
-        serializer = UserSerializer(user,many=True)
-        return Response(serializer.data)
+        response = Response({"detail": "Login successful","token": access,"refresh": refresh}, status=status.HTTP_200_OK)
 
-    def post(self,request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data)
-        return Response(serializer.errors, status=400)
+        expires = datetime.datetime.utcnow() + datetime.timedelta(days=1)
 
+        # HTTP SHOULD BE TRUE ???
+        response.set_cookie(
+            'token', access,
+            httponly=False, secure=True, samesite='Lax', expires=expires
+        )
+        response.set_cookie(
+            'refresh', refresh,
+            httponly=False, secure=True, samesite='Lax', expires=expires
+        )
 
-class LoginApiView(APIView):
-
-    def post(self,request):
-
-        email = request.data['email']
-        password = request.data['password']
-
-        user = User.objects.filter(email=email).first()
-
-        if user is None:
-            raise AuthenticationFailed("User not found!")
-
-        if not user.check_password(password):
-            raise AuthenticationFailed("Incorrect password!")
-
-        payload = {
-            "id": user.id,
-            "exp": datetime.datetime.utcnow() + datetime.timedelta(minutes=10),
-            "iat": datetime.datetime.utcnow()
-        }
-
-        token = jwt.encode(payload,'secret',algorithm='HS256')
-
-        response = Response()
-        response.set_cookie(key='jwt',value=token,httponly=True)
-
-        response.data = {
-            "jwt": token
-        }
         return response
 
 
-class UserAPIView(APIView):
+# WILL NEED FOR LATER
 
-    def get(self,request):
+class UserApiViewSet(ModelViewSet):
 
-        token = request.COOKIES.get("jwt")
+    permission_classes = [AllowAny]
+    authentication_classes = [CookieJWTAuthentication]
 
-        if not token:
-            raise AuthenticationFailed("Unauthenticated")
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
-        try:
-            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
-        except jwt.ExpiredSignatureError:
-            raise AuthenticationFailed("Unauthenticated")
-
-        user = User.objects.get(id=payload['id'])
+    def get(self, request):
+        user = request.user
         serializer = UserSerializer(user)
-
         return Response(serializer.data)
 
 
@@ -187,12 +153,12 @@ class LogoutApiView(APIView):
     def post(self,request):
 
         response = Response()
-        response.delete_cookie("jwt")
+        response.delete_cookie("refresh")
+        response.delete_cookie("token")
 
         response.data = {
             'message': 'success'
         }
 
         return response
-
 

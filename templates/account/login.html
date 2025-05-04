@@ -2,64 +2,64 @@
 {% load widget_tweaks %}
 
 {% block content %}
-<div class="container mt-5 d-flex justify-content-center">
-    <div class="card shadow-sm w-100" style="max-width: 500px;">
-        <div class="card-body">
-            <h3 class="card-title mb-4 text-center">Login</h3>
+    <div class="container mt-5 d-flex justify-content-center">
+        <div class="card shadow-sm w-100" style="max-width: 500px;">
+            <div class="card-body">
+                <h3 class="card-title mb-4 text-center">Login</h3>
 
-            <form method="post" action="{% url 'login profile' %}">
-                {% csrf_token %}
+                <form method="post" action="{% url 'login profile' %}">
+                    {% csrf_token %}
 
-                <div class="mb-3">
-                    {{ form.username.label_tag }}
-                    {{ form.username|add_class:"form-control" }}
+                    <div class="mb-3">
+                        {{ form.username.label_tag }}
+                        {{ form.username|add_class:"form-control" }}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password.label_tag }}
+                        {{ form.password|add_class:"form-control" }}
+                    </div>
+
+                    <button type="submit" onclick="loginFunc(event)" class="btn btn-primary w-100">Login</button>
+                </form>
+
+                <div class="text-center mt-3">
+                    <small>Don't have an account?
+                        <a href="{% url 'create profile' %}">Register here</a>
+                    </small>
                 </div>
-
-                <div class="mb-3">
-                    {{ form.password.label_tag }}
-                    {{ form.password|add_class:"form-control" }}
-                </div>
-
-                <button type="submit" class="btn btn-primary w-100">Login</button>
-            </form>
-            <br>
-            <button type="submit" onclick="loginFunc()" class="btn btn-primary w-100">TEST LOGIN</button>
-
-
-            <div class="text-center mt-3">
-                <small>Don't have an account?
-                    <a href="{% url 'create profile' %}">Register here</a>
-                </small>
             </div>
         </div>
     </div>
-</div>
 
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
 
-    function loginFunc() {
-        $.ajax({
-        url : 'http://localhost:8000/api/login/',
-        type : 'POST',
-        data : {
-            "email": "test@abv.bg",
-            "password": "123"
-        },
-        success : function(data) {
-            console.log(data);
-            window.location.href = 'http://localhost:8000/';
-        },
-        error : function(xhr, status, error)
-        {
-            console.log(xhr.status);
-            console.log(error);
-        }
-    });
-    }
+        function loginFunc(event) {
+            
+            event.preventDefault()
 
-    
-    
+            let email = document.querySelector("input[name='username']").value;
+            let password = document.querySelector("input[name='password']").value;
+        
+            $.ajax({
+                url: 'http://localhost:8000/api/login/',
+                type: 'POST',
+                data: {
+                    "email": email,
+                    "password": password
+                },
+                success: function (data) {
+                    console.log(data);
+                    window.location.href = 'http://localhost:8000/';
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(error);
+                }
+            });
+        }
+
     </script>
 {% endblock %}

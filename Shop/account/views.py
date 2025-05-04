@@ -1,72 +1,52 @@
-from django.contrib.auth import login, logout, get_user_model
+from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import AuthenticationForm
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
 from django.urls import reverse_lazy
-from django.views.generic import CreateView, UpdateView, DetailView, DeleteView, TemplateView
-from django.contrib.auth.views import LoginView, LogoutView
-from rest_framework.exceptions import AuthenticationFailed
-from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.views.generic import UpdateView, TemplateView
 
 from Shop.account.forms import CreateProfileForm, EditProfileForm
-from Shop.account.test_funcions import NotAuthenticatedUser, OwnProfileAccessMixin
+from Shop.api.authentication import FlexibleJWTAuthMixin, EnsureOwnProfileMixin
 from Shop.shop_app.models import Profile
-
-
-import jwt
-import datetime
 
 User = get_user_model()
 
 
-class CreateProfile(NotAuthenticatedUser, TemplateView):
-
+class CreateProfile(FlexibleJWTAuthMixin, TemplateView):
+    allow_authenticated = False
+    unauthorized_user_redirect = reverse_lazy("home page")
     template_name = 'account/register.html'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["form"] = CreateProfileForm
-        return context
-
-class LoginUser(NotAuthenticatedUser,TemplateView):
-
-   template_name = 'account/login.html'
-
-   def get_context_data(self, **kwargs):
-       context = super().get_context_data(**kwargs)
-       context["form"] = AuthenticationForm
-       return context
+    extra_context = {"form": CreateProfileForm}
 
 
+class LoginUser(FlexibleJWTAuthMixin, TemplateView):
+    allow_authenticated = False
+    unauthorized_user_redirect = reverse_lazy("home page")
+    template_name = 'account/login.html'
+    extra_context = {"form": AuthenticationForm}
 
-class LogoutUser(LogoutView):
-    pass
 
-class EditProfile(OwnProfileAccessMixin, UpdateView):
+# Maybe modal, do later
+class LogoutUser(TemplateView):
+    template_name = 'account/profile-logout.html'
 
+# CONTEXT REPEATED
+
+class EditProfile(EnsureOwnProfileMixin, UpdateView):
     model = Profile
     template_name = "account/edit-profile.html"
     form_class = EditProfileForm
-    success_url = reverse_lazy('home page')
+    target_named_url = "profile details"
 
-class ProfileDetails(LoginRequiredMixin,DetailView):
 
-    model = Profile
+class ProfileDetails(EnsureOwnProfileMixin, TemplateView):
     template_name = "account/profile-details.html"
-    context_object_name = 'profile'
+    target_named_url = "profile details"
 
-class DeleteProfile(OwnProfileAccessMixin,DeleteView):
 
-    model = Profile
+class DeleteProfile(EnsureOwnProfileMixin, TemplateView):
     template_name = "account/profile-delete.html"
-    success_url = reverse_lazy("home page")
+    target_named_url = "delete profile"
 
-    def form_valid(self, form):
-        self.object.user.delete()
-        self.object.delete()
-        logout(self.request)
-        return redirect(self.success_url)
-
-
-
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        context["user"] = self.request.user
+        return context

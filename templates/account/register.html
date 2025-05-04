@@ -51,29 +51,26 @@
                         {{ form.profile_picture|add_class:"form-control" }}
                     </div>
 
-                    <button type="button" onclick=registerUser() class="btn btn-primary w-100">Register</button>
+                    <button type="button" onclick=registerUser(event) class="btn btn-primary w-100">Register</button>
                 </form>
 
             </div>
         </div>
     </div>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
 
-
-        function registerUser() {
-
+        function registerUser(event) {
+            event.preventDefault();
 
             let formData = new FormData();
 
-            let email = document.querySelector('input[name="email"]').value
-            let password = document.querySelector('input[name="password1"]').value
-            let passwordConfirm = document.querySelector('input[name="password2"]').value
-            let first_name = document.querySelector('input[name="first_name"]').value
-            let last_name = document.querySelector('input[name="last_name"]').value
-            let age = document.querySelector('input[name="age"]').value
-
+            let email = document.querySelector('input[name="email"]').value;
+            let password = document.querySelector('input[name="password1"]').value;
+            let passwordConfirm = document.querySelector('input[name="password2"]').value;
+            let first_name = document.querySelector('input[name="first_name"]').value;
+            let last_name = document.querySelector('input[name="last_name"]').value;
+            let age = document.querySelector('input[name="age"]').value;
 
             formData.append("email", email);
             formData.append("password", password);
@@ -82,21 +79,37 @@
             formData.append("profile.last_name", last_name);
             formData.append("profile.age", age);
 
-            // Append the file from the input
             let fileInput = document.querySelector('input[name="profile_picture"]');
             if (fileInput.files.length > 0) {
                 formData.append("profile.profile_picture", fileInput.files[0]);
             }
 
+            // First AJAX: register the user
             $.ajax({
-                url: "http://localhost:8000/api/register/",
+                url: "http://localhost:8000/api/user/",
                 type: 'POST',
                 data: formData,
                 contentType: false,
-                processData: false,  // Important: prevents jQuery from processing the data
+                processData: false,
                 success: function (res) {
-                    console.log(res);
-                    window.location.href = "http://localhost:8000/";
+                    console.log("User registered:", res);
+
+                    // Now login after successful registration
+                    $.ajax({
+                        url: 'http://localhost:8000/api/login/',
+                        type: 'POST',
+                        data: {
+                            "email": email,
+                            "password": password
+                        },
+                        success: function (data) {
+                            console.log("User logged in:", data);
+                            window.location.href = 'http://localhost:8000/';
+                        },
+                        error: function (xhr, status, error) {
+                            console.error("Login failed:", error);
+                        }
+                    });
                 },
                 error: function (xhr) {
                     if (xhr.responseJSON) {
@@ -113,7 +126,7 @@
                             }
                         }
 
-                        alert(errorMessage);  // Show all error messages nicely
+                        alert(errorMessage);
                     } else {
                         alert("An unknown error occurred.");
                     }

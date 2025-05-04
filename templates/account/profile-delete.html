@@ -8,8 +8,8 @@
                 <h4>Delete Profile</h4>
             </div>
             <div class="card-body text-center">
-                <p class="fs-5">Are you sure you want to delete the profile of <strong>{{ profile.first_name }} {{ profile.last_name }}</strong>?</p>
-                <form method="POST" action="{% url 'delete profile' request.user.id %}">
+                <p class="fs-5">Are you sure you want to delete the profile of <strong>{{ user.profile.first_name }} {{ profile.last_name }}</strong>?</p>
+                <form method="POST" action="{% url 'delete profile' user.id %}">
                     {% csrf_token %}
                     {{ form }}
                     <button type="submit" class="btn btn-danger me-2">Yes, Delete</button>

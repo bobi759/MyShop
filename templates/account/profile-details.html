@@ -2,24 +2,49 @@
 {% block content %}
     <body class="bg-light">
     <div class="container mt-5">
-        <div class="card mx-auto" style="max-width: 500px;">
-            <div class="card-header text-center bg-primary text-white">
+        <div class="card mx-auto" style="max-width: 500px;" id="profileDetailsCard">
+
+        </div>
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+
+
+        $(document).ready(function profileDetails() {
+
+            const decodedToken = getDecodedToken("token")
+            const user_id = decodedToken.user_id
+            console.log(user_id)
+
+            $.ajax({
+                url: `http://localhost:8000/api/user/${user_id}`,
+                type: 'GET',
+                success: function (user) {
+                    console.log(user)
+                    $("#profileDetailsCard").append(`<div class="card-header text-center bg-primary text-white">
                 <h4>User Profile</h4>
             </div>
             <div class="card-body text-center">
-                {% if profile.profile_picture %}
-                    <img src="{{ profile.profile_picture.url }}" alt="Profile Picture" class="rounded-circle mb-3"
-                         width="150" height="150">
-                {% else %}
-                    <img src="https://via.placeholder.com/150" alt="Default Profile Picture"
-                         class="rounded-circle mb-3">
-                {% endif %}
-                <h5 class="card-title">{{ profile.first_name }} {{ profile.last_name }}</h5>
-                <h5 class="card-title">Username: {{ profile.user.email }}</h5>
+                <img src="${user.profile.profile_picture}" alt="Profile Picture" class="rounded-circle mb-3"
+                     width="150" height="150">
+                <h5 class="card-title">${user.profile.first_name } ${user.profile.last_name }</h5>
+                <h5 class="card-title">Username: ${ user.email }</h5>
 
-                <p class="card-text"><strong>Age:</strong> {{ profile.age }}</p>
-            </div>
-        </div>
-    </div>
+                <p class="card-text"><strong>Age:</strong> ${ user.profile.age }</p>
+            </div>`);
+
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(error);
+                }
+            });
+        })
+
+
+    </script>
 
 {% endblock %}

@@ -1,15 +1,22 @@
 from django.urls import path, include
 
 
-from Shop.api.views import CartViewSet, BookReadOnlyViewSet, GenreReadOnlyViewSet, Register, LoginApiView, \
-    UserAPIView, LogoutApiView
+from Shop.api.views import CartViewSet, BookReadOnlyViewSet, GenreReadOnlyViewSet, \
+     LogoutApiView, MyObtainTokenPairView, UserApiViewSet
 from Shop.api.views import CartItemsViewSet
 from rest_framework_nested import routers
+
+
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView, TokenVerifyView,
+)
 
 router = routers.SimpleRouter()
 router.register(r'book',BookReadOnlyViewSet)
 
 router.register(r'genre',GenreReadOnlyViewSet)
+router.register(r'user', UserApiViewSet)
 
 router.register(r'cart', CartViewSet)
 
@@ -21,13 +28,13 @@ urlpatterns = [
     path(r'', include(router.urls)),
     path(r'', include(cart_router.urls)),
 
-    path("register/",Register.as_view()),
+    path("login/", MyObtainTokenPairView.as_view()),
 
-    path("login/",LoginApiView.as_view()),
+    path("logout/",LogoutApiView.as_view()),
 
-    path("user/",UserAPIView.as_view()),
+    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # path('token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
 
-    path("logout/",LogoutApiView.as_view())
-
+    # path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
 
 ]
