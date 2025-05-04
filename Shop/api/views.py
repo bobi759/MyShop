@@ -4,10 +4,11 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
+from urllib3 import Retry
 
 from Shop.api.authentication import CookieJWTAuthentication
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
-    CartItemUpdateSerializer, CartRetrieveSerializer, UserSerializer
+    CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer
 
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -19,9 +20,7 @@ from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 import datetime
 from rest_framework import status
 
-
 User = get_user_model()
-
 
 
 class CartViewSet(ModelViewSet):
@@ -29,43 +28,37 @@ class CartViewSet(ModelViewSet):
     serializer_class = CartSerializer
 
 
-
 class CartItemsViewSet(ModelViewSet):
-
     list_serializer = CartItemListSerializer
     create_serializer = CartItemCreateSerializer
     update_serializer = CartItemUpdateSerializer
     retrieve_serializer = CartRetrieveSerializer
-    
 
     queryset = CartItem.objects.all()
     lookup_field = "id"
-    parser_classes = [JSONParser,]
+    parser_classes = [JSONParser, ]
 
     def get_serializer_class(self):
         if self.action == 'list':
             return self.list_serializer
         if self.request.method == 'POST':
             return self.create_serializer
-        if self.request.method in ['PUT','PATCH']:
+        if self.request.method in ['PUT', 'PATCH']:
             return self.update_serializer
         if self.action == 'retrieve':
             return self.retrieve_serializer
 
-
     def destroy(self, request, *args, **kwargs):
-        super().destroy(request,*args,**kwargs)
-        cart_id = kwargs.get("cart_id_pk",None)
+        super().destroy(request, *args, **kwargs)
+        cart_id = kwargs.get("cart_id_pk", None)
         cart = Cart.objects.get(id=cart_id)
         return Response({'new_total_price': cart.total_price}, status=200)
 
-
     def get_serializer_context(self):
-        return {"cart_id": self.kwargs.get("cart_id_pk","")}
+        return {"cart_id": self.kwargs.get("cart_id_pk", "")}
 
 
 class BookReadOnlyViewSet(ReadOnlyModelViewSet):
-
     authentication_classes = []
 
     queryset = Book.objects.all()
@@ -77,8 +70,6 @@ class BookReadOnlyViewSet(ReadOnlyModelViewSet):
         # if new_query:
         #     return new_query
         # return self.queryset
-
-
 
         genre = self.request.query_params.get("genre")
         if genre:
@@ -98,10 +89,8 @@ class BookReadOnlyViewSet(ReadOnlyModelViewSet):
 
 
 class GenreReadOnlyViewSet(ReadOnlyModelViewSet):
-
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-
 
 
 class MyObtainTokenPairView(TokenObtainPairView):
@@ -115,7 +104,8 @@ class MyObtainTokenPairView(TokenObtainPairView):
         access = serializer.validated_data.get("access")
         refresh = serializer.validated_data.get("refresh")
 
-        response = Response({"detail": "Login successful","token": access,"refresh": refresh}, status=status.HTTP_200_OK)
+        response = Response({"detail": "Login successful", "token": access, "refresh": refresh},
+                            status=status.HTTP_200_OK)
 
         expires = datetime.datetime.utcnow() + datetime.timedelta(days=1)
 
@@ -135,23 +125,32 @@ class MyObtainTokenPairView(TokenObtainPairView):
 # WILL NEED FOR LATER
 
 class UserApiViewSet(ModelViewSet):
-
     permission_classes = [AllowAny]
     authentication_classes = [CookieJWTAuthentication]
 
     queryset = User.objects.all()
-    serializer_class = UserSerializer
+    create_user_serializer = CreateUserSerializer
+    edit_user_serializer = EditUserSerializer
 
     def get(self, request):
         user = request.user
-        serializer = UserSerializer(user)
+        serializer = CreateUserSerializer(user)
         return Response(serializer.data)
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return self.create_user_serializer
+        if self.request.method == "POST":
+            return self.create_user_serializer
+        if self.request.method in ["PUT", "PATCH"]:
+            return self.edit_user_serializer
 
 
 class LogoutApiView(APIView):
 
-    def post(self,request):
+    permission_classes = [AllowAny]
 
+    def post(self, request):
         response = Response()
         response.delete_cookie("refresh")
         response.delete_cookie("token")
@@ -161,4 +160,3 @@ class LogoutApiView(APIView):
         }
 
         return response
-

@@ -1,6 +1,7 @@
 from attr import dataclass
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
+from django.core.validators import MinValueValidator
 from django.db.models import Model
 from rest_framework import serializers
 from rest_framework.fields import ImageField
@@ -109,7 +110,7 @@ class ProfileSerializer(ModelSerializer):
         model = Profile
         fields = ("first_name","last_name","age","profile_picture")
 
-class UserSerializer(ModelSerializer):
+class CreateUserSerializer(ModelSerializer):
 
     profile = ProfileSerializer(many=False)
     password2 = serializers.CharField(write_only=True)
@@ -120,6 +121,8 @@ class UserSerializer(ModelSerializer):
         extra_kwargs = {
             "password": {"write_only": True}
         }
+
+
 
     def create(self, validated_data):
         profile_data = validated_data.pop('profile')
@@ -147,3 +150,59 @@ class UserSerializer(ModelSerializer):
         profile_serializer = ProfileSerializer(data=profile_data)
         profile_serializer.is_valid(raise_exception=True)
         return attrs
+
+#
+# class EditUserSerializer(ModelSerializer):
+#
+#     profile = ProfileSerializer(many=False)
+#
+#     class Meta:
+#
+#         model = User
+#         fields = ("id","email","profile")
+#
+#     def update(self, instance, validated_data):
+#         profile_data = validated_data.pop('profile', None)
+#         instance.email = validated_data.get("email",None)
+#         instance.save()
+#
+#         profile = instance.profile
+#
+#         breakpoint()
+#         profile.first_name = profile_data["first_name"]
+#         profile.last_name = profile_data["last_name"]
+#         profile.age = profile_data["age"]
+#         profile.profile_picture = profile_data.get("profile_picture",None)
+#         profile.save()
+#
+#
+#         return instance
+
+
+class EditUserSerializer(serializers.ModelSerializer):
+
+    profile = ProfileSerializer(many=False)
+
+    class Meta:
+        model = User
+        fields = ("id", "email", "profile")
+
+
+    def update(self, instance, validated_data):
+        profile_data = validated_data.pop("profile", {})
+        instance.email = validated_data.get("email", instance.email)
+        instance.save()
+        profile = instance.profile
+        profile.first_name = profile_data.get("first_name", profile.first_name)
+        profile.last_name = profile_data.get("last_name", profile.last_name)
+        profile.age = profile_data.get("age", profile.age)
+
+        if profile_data.get("profile_picture"):
+            profile.profile_picture = profile_data["profile_picture"]
+
+        profile.save()
+
+        return instance
+
+
+

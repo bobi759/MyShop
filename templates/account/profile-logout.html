@@ -6,17 +6,39 @@
         <div class="card shadow-sm w-100" style="max-width: 500px;">
             <div class="card-body">
                 <h3 class="card-title mb-4 text-center">Confirm Logout</h3>
-
                 <p class="text-center">Are you sure you want to log out?</p>
 
-                <form method="post" action="{% url 'logout profile' %}">
-                    {% csrf_token %}
-                    <div class="d-flex justify-content-between">
-                        <a href="{% url 'home page' %}" class="btn btn-secondary w-45">Cancel</a>
-                        <button type="submit" class="btn btn-danger w-45">Logout</button>
-                    </div>
-                </form>
+                <div class="d-flex justify-content-between">
+                    <a href="/" class="btn btn-secondary w-45">Cancel</a>
+                    <button onclick="logOut()" class="btn btn-danger w-45">Logout</button>
+                </div>
             </div>
         </div>
     </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <script>
+        function logOut() {
+            const decoded_token = getDecodedToken("token")
+            const user_id = decoded_token.user_id
+            $.ajax({
+                url: `http://localhost:8000/api/logout/`,
+                type: 'POST',
+                headers: {
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                success: function () {
+                    window.location.href = "http://localhost:8000/"
+                },
+                error: function (xhr, status, error) {
+                    console.log(xhr.status);
+                    console.log(error);
+                }
+            });
+        }
+
+
+    </script>
+
 {% endblock %}

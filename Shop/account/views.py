@@ -30,11 +30,11 @@ class LogoutUser(TemplateView):
 
 # CONTEXT REPEATED
 
-class EditProfile(EnsureOwnProfileMixin, UpdateView):
-    model = Profile
+class EditProfile(EnsureOwnProfileMixin,TemplateView):
     template_name = "account/edit-profile.html"
-    form_class = EditProfileForm
     target_named_url = "profile details"
+
+
 
 
 class ProfileDetails(EnsureOwnProfileMixin, TemplateView):
