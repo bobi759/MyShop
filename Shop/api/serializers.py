@@ -37,7 +37,7 @@ class CartRetrieveSerializer(serializers.ModelSerializer):
 
 
 class CartItemListSerializer(serializers.ModelSerializer):
-    product = BookSerializer()
+    product = BookSerializer(many=False)
     subtotal = serializers.SerializerMethodField(method_name="total")
 
     class Meta:
@@ -75,12 +75,10 @@ class CartItemCreateSerializer(serializers.ModelSerializer):
 
 class CartItemUpdateSerializer(serializers.ModelSerializer):
 
-
     class Meta:
 
         model = CartItem
         fields = "__all__"
-
 
 
 # CART SERIALIZER
@@ -129,10 +127,12 @@ class CreateUserSerializer(ModelSerializer):
         password = validated_data.pop('password')
         validated_data.pop('password2', None)
 
-
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+        cart = Cart.objects.create(user=user)
+        cart.save()
+        breakpoint()
         Profile.objects.create(user=user, **profile_data)
         return user
 
@@ -150,33 +150,6 @@ class CreateUserSerializer(ModelSerializer):
         profile_serializer = ProfileSerializer(data=profile_data)
         profile_serializer.is_valid(raise_exception=True)
         return attrs
-
-#
-# class EditUserSerializer(ModelSerializer):
-#
-#     profile = ProfileSerializer(many=False)
-#
-#     class Meta:
-#
-#         model = User
-#         fields = ("id","email","profile")
-#
-#     def update(self, instance, validated_data):
-#         profile_data = validated_data.pop('profile', None)
-#         instance.email = validated_data.get("email",None)
-#         instance.save()
-#
-#         profile = instance.profile
-#
-#         breakpoint()
-#         profile.first_name = profile_data["first_name"]
-#         profile.last_name = profile_data["last_name"]
-#         profile.age = profile_data["age"]
-#         profile.profile_picture = profile_data.get("profile_picture",None)
-#         profile.save()
-#
-#
-#         return instance
 
 
 class EditUserSerializer(serializers.ModelSerializer):
@@ -203,6 +176,24 @@ class EditUserSerializer(serializers.ModelSerializer):
         profile.save()
 
         return instance
+
+
+
+class GetUserSerializer(serializers.ModelSerializer):
+    cart_id = serializers.SerializerMethodField()
+    profile = ProfileSerializer(many=False)
+
+
+    class Meta:
+        model = User
+        fields = ("id","email","profile","cart_id")
+
+    def get_cart_id(self, obj):
+        try:
+            return obj.cart.id  # Access the reverse relation of the OneToOneField
+        except Cart.DoesNotExist:
+            return None
+
 
 
 

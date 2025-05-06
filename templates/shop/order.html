@@ -11,7 +11,7 @@
 
     <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
 
-
+<div class="order-wrapper">
     <div class="container">
         <div class="row">
             <div class="col-xl-8">
@@ -104,13 +104,63 @@
   </div>
 </div>
 
-
     </div>
+</div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="{% static 'script/main.js' %}"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+
     <script>
 
+        function getDecodedToken(cookieName) {
+        const value = `; e${document.cookie}`;
+        const parts = value.split(`; ${cookieName}=`);
+
+        if (parts.length === 2) {
+            try {
+                let token = parts.pop().split(';').shift();
+                return jwt_decode(token);
+            } catch (error) {
+                console.warn("Failed to decode token:", error);
+            }
+        }
+
+        return null;
+    }
+
+    let cart_id;
+
+        $(document).ready(() => {
+
+            getCartId()
+
+
+        })
+
+
+        function getCartId(){
+
+        let decoded_token = getDecodedToken("token")
+            let user_id = decoded_token["user_id"]
+
+
+            $.ajax({
+                method: "GET",
+                url: `http://localhost:8000/api/user/${user_id}/`,
+                success: (data) =>  {
+                    cart_id = data["cart_id"]
+                    console.log(cart_id)
+                    getAllBookNames();
+                },
+                error: (error) => {
+                    console.log(error);
+                }
+            });
+
+        }
+
+
+        
         $('#exampleModal').on('shown.bs.modal', function () {
             $('#exampleModalInput').trigger('focus');
         });
@@ -121,13 +171,18 @@
     modalInstance.hide();
 }
 
+            
 
+            
         function deleteItem(item_id) {
             let $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
+            
+            
 
             $.ajax({
                 method: "DELETE",
-                url: `http://localhost:8000/api/cart/e75d8bc5-815c-4c39-a0c7-df5c7915fb8f/items/${item_id}/`,
+                url: `http://localhost:8000/api/cart/${cart_id}/items/${item_id}/`,
+                
                 headers: {
                     "X-CSRFToken": $crf_token,
                     "Content-Type": "application/json",
@@ -135,7 +190,7 @@
                 success: (data) =>  {
                     console.log(data);
                     $(`#cart-item-${item_id}`).parent().remove();
-                    $(".text-end .fw-bold").text(`$${(data.new_total_price).toFixed(2)}`);
+                    {#$(".text-end .fw-bold").text(`$${(data.new_total_price).toFixed(2)}`);#}
                 },
                 error: (error) => {
                     console.log(error);
@@ -144,28 +199,25 @@
 
         }
 
-
-       
 
         function getAllBookNames() {
             console.log("Getting data from the server...");
             $.ajax({
                 method: "GET",
-                url: "http://localhost:8000/api/cart/e75d8bc5-815c-4c39-a0c7-df5c7915fb8f/",
-                success: (data) => {
-
-                    let books = data.items
-                    
+                url: `http://localhost:8000/api/cart/${cart_id}/items/`,
+                success: (books) => {
+                        console.log(books)
                     books.forEach(item => {
                         addEmptyCard(item);
                     });
-                    $(".text-end .fw-bold").text(`$${(data.grand_total).toFixed(2)}`);
+                    {#$(".text-end .fw-bold").text(`$${(books.grand_total).toFixed(2)}`);#}
                 },
                 error: (error) => {
                     console.log(error);
                 }
             });
         }
+
 
 
 
@@ -232,15 +284,7 @@
 
    
 
-
-
-        $(document).ready(function () {
-            getAllBookNames();
-        });
-
-
     </script>
-
 
 
 {% endblock %}

@@ -1,4 +1,8 @@
 from django.contrib.auth import get_user_model
+from django.db.models.fields import return_None
+from django.shortcuts import get_object_or_404
+from rest_framework.decorators import action
+from rest_framework.exceptions import NotFound
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -8,7 +12,7 @@ from urllib3 import Retry
 
 from Shop.api.authentication import CookieJWTAuthentication
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
-    CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer
+    CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer
 
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
@@ -23,11 +27,13 @@ from rest_framework import status
 User = get_user_model()
 
 
+# NO NEED OF RETRIEVE SINCE WE ONLY USE THE CURRENT CART
 class CartViewSet(ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+    permission_classes = [AllowAny,]
 
-
+#
 class CartItemsViewSet(ModelViewSet):
     list_serializer = CartItemListSerializer
     create_serializer = CartItemCreateSerializer
@@ -48,14 +54,17 @@ class CartItemsViewSet(ModelViewSet):
         if self.action == 'retrieve':
             return self.retrieve_serializer
 
-    def destroy(self, request, *args, **kwargs):
-        super().destroy(request, *args, **kwargs)
-        cart_id = kwargs.get("cart_id_pk", None)
-        cart = Cart.objects.get(id=cart_id)
-        return Response({'new_total_price': cart.total_price}, status=200)
+
+    def get_queryset(self):
+        old_queryset = super().get_queryset()
+        new_queryset = old_queryset.filter(cart_id = self.kwargs["cart_pk"])
+        return new_queryset
+
 
     def get_serializer_context(self):
-        return {"cart_id": self.kwargs.get("cart_id_pk", "")}
+        context = super().get_serializer_context()
+        context["cart_id"] = self.kwargs["cart_pk"]
+        return context
 
 
 class BookReadOnlyViewSet(ReadOnlyModelViewSet):
@@ -130,16 +139,12 @@ class UserApiViewSet(ModelViewSet):
 
     queryset = User.objects.all()
     create_user_serializer = CreateUserSerializer
+    get_user_serializer = GetUserSerializer
     edit_user_serializer = EditUserSerializer
-
-    def get(self, request):
-        user = request.user
-        serializer = CreateUserSerializer(user)
-        return Response(serializer.data)
 
     def get_serializer_class(self):
         if self.request.method == "GET":
-            return self.create_user_serializer
+            return self.get_user_serializer
         if self.request.method == "POST":
             return self.create_user_serializer
         if self.request.method in ["PUT", "PATCH"]:
@@ -160,3 +165,6 @@ class LogoutApiView(APIView):
         }
 
         return response
+
+
+

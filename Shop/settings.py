@@ -54,9 +54,9 @@ INSTALLED_APPS = [
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
-        # 'rest_framework_simplejwt.authentication.JWTAuthentication',  # For your API/React
-        'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework_simplejwt.authentication.JWTAuthentication'
         'Shop.api.authentication.CookieJWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated',

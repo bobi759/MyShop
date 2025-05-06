@@ -48,14 +48,15 @@ class FlexibleJWTAuthMixin(JWTUserAuthMixin):
         try:
             # There is user
             user = self.authenticate_and_assign_user(request)
+            # if user:
             if user:
-                # redirect authenticated with no permission to see this page
-                return HttpResponseRedirect(self.get_unauthorized_user_redirect(),status=HTTP_302_FOUND)
+                if not self.allow_authenticated:
+                    return HttpResponseRedirect(self.get_unauthorized_user_redirect(),status=HTTP_302_FOUND)
             else:
             # no user
                 if self.allow_authenticated:
                     return HttpResponseRedirect(self.get_unauthenticated_user_redirect(),status=HTTP_302_FOUND)
-                return super().dispatch(request, *args, **kwargs)
+            return super().dispatch(request, *args, **kwargs)
 
         except Exception:
         # if something goes wrong

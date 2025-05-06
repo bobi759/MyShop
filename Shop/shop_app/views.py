@@ -18,4 +18,5 @@ class BookDetailView(FlexibleJWTAuthMixin, TemplateView):
 
 # ORDER VIEW
 class OrderView(FlexibleJWTAuthMixin, TemplateView):
+    allow_authenticated = True
     template_name = "shop/order.html"
