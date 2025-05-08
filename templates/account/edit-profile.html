@@ -38,7 +38,8 @@
                         <input type="file" id="profile_picture" name="profile_picture" class="form-control"/>
                     </div>
 
-                    <button type="submit" onclick="editUser(event)" class="btn btn-primary w-100 mt-3">Save Changes</button>
+                    <button type="submit" onclick="editUser(event)" class="btn btn-primary w-100 mt-3">Save Changes
+                    </button>
                 </form>
             </div>
         </div>
@@ -49,10 +50,8 @@
 
     <script>
         $(document).ready(function loadElement() {
-            const decoded_token = getDecodedToken("token")
-            const user_id = decoded_token.user_id
             $.ajax({
-                url: `http://localhost:8000/api/user/${user_id}/`,
+                url: `http://localhost:8000/api/current-user`,
                 type: 'GET',
                 success: function (user) {
                     $("#email").val(user.email)
@@ -68,6 +67,24 @@
                 }
             });
         })
+
+        function getCSRFToken() {
+            let name = 'csrftoken';
+            let cookieValue = null;
+
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let cookie of cookies) {
+                    cookie = cookie.trim();
+
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
 
 
         function editUser(event) {
@@ -91,15 +108,16 @@
                 formData.append("profile.profile_picture", fileInput.files[0]);
             }
 
-            const decoded_token = getDecodedToken("token")
-            const user_id = decoded_token.user_id
             $.ajax({
-                url: `http://localhost:8000/api/user/${user_id}/`,
+                url: `http://localhost:8000/api/current-user/`,
                 type: 'PATCH',
+                headers: {
+                    "X-CSRFToken": getCSRFToken()
+                },
                 data: formData,
                 processData: false,
                 contentType: false,
-                success: function (user) {
+                success: function (data) {
                     alert("Profile was updated successfully")
                     window.document.location = "http://localhost:8000/"
                 },

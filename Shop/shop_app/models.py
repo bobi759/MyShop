@@ -114,3 +114,36 @@ class CartItem(models.Model):
     def __str__(self):
         return f"{self.product.title} added to {self.cart.id}"
 
+
+
+class Order(models.Model):
+
+    STATUS_SHIPPED = 'S'
+    STATUS_COMPLETED = 'C'
+    STATUS_FAILED = 'F'
+    STATUS_PENDING = 'P'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, "Pending"),
+        (STATUS_SHIPPED,"Shipped"),
+        (STATUS_COMPLETED, 'Completed'),
+        (STATUS_FAILED, 'Failed'),
+    ]
+
+    placed_at = models.DateTimeField(auto_now_add=True)
+    # Some logic about this needed
+    owner = models.ForeignKey(User,on_delete=models.PROTECT)
+    order_status = models.CharField(max_length=1,choices=STATUS_CHOICES,default=STATUS_PENDING)
+
+    def __str__(self):
+        return self.order_status
+
+class OrderItems(models.Model):
+
+    order = models.ForeignKey(Order,on_delete=models.PROTECT,related_name="items")
+    product = models.ForeignKey(Book,on_delete=models.PROTECT)
+    quantity = models.PositiveIntegerField(default=1)
+
+    def __str__(self):
+        return self.product.title
+

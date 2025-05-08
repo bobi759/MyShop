@@ -7,8 +7,9 @@ from rest_framework import serializers
 from rest_framework.fields import ImageField
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.serializers import ModelSerializer
+import uuid
 
-from Shop.shop_app.models import Genre, Book, Cart, CartItem, Profile
+from Shop.shop_app.models import Genre, Book, Cart, CartItem, Profile, Order, OrderItems
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -132,7 +133,6 @@ class CreateUserSerializer(ModelSerializer):
         user.save()
         cart = Cart.objects.create(user=user)
         cart.save()
-        breakpoint()
         Profile.objects.create(user=user, **profile_data)
         return user
 
@@ -169,12 +169,9 @@ class EditUserSerializer(serializers.ModelSerializer):
         profile.first_name = profile_data.get("first_name", profile.first_name)
         profile.last_name = profile_data.get("last_name", profile.last_name)
         profile.age = profile_data.get("age", profile.age)
-
         if profile_data.get("profile_picture"):
             profile.profile_picture = profile_data["profile_picture"]
-
         profile.save()
-
         return instance
 
 
@@ -195,5 +192,59 @@ class GetUserSerializer(serializers.ModelSerializer):
             return None
 
 
+class OrderItemSerializer(ModelSerializer):
 
+    product = BookSerializer()
+
+    class Meta:
+
+        model = OrderItems
+        fields = "__all__"
+
+
+class CreateOrderSerializer(serializers.Serializer):
+
+    cart_id = serializers.UUIDField()
+
+
+    def validate_cart_id(self, value):
+        cart = Cart.objects.get(id=value)
+        if not cart.items.exists():
+            raise serializers.ValidationError("Cannot place an order with an empty cart.")
+
+        return value
+
+
+
+    def save(self, **kwargs):
+        cart_id = self.validated_data["cart_id"]
+        user = self.context["user"]
+        order = Order.objects.create(owner=user)
+        cart = Cart.objects.get(id=cart_id)
+        [OrderItems.objects.create(order=order,product=item.product,quantity=item.quantity) for item in cart.items.all()]
+        order.save()
+        cart.items.all().delete()
+        return order
+
+
+
+
+class OrderSerializer(ModelSerializer):
+
+    items = OrderItemSerializer(many=True)
+
+    class Meta:
+
+        model = Order
+        fields = ("id","owner","order_status","placed_at","items")
+
+
+
+class TestUserSerializer(serializers.ModelSerializer):
+    profile = ProfileSerializer(many=False)
+
+
+    class Meta:
+        model = User
+        fields = ("id","email","profile")
 

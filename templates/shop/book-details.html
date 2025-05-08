@@ -120,32 +120,13 @@
         });
 
 
-        function getDecodedToken(cookieName) {
-            const value = `; e${document.cookie}`;
-            const parts = value.split(`; ${cookieName}=`);
-
-            if (parts.length === 2) {
-                try {
-                    let token = parts.pop().split(';').shift();
-                    return jwt_decode(token);
-                } catch (error) {
-                    console.warn("Failed to decode token:", error);
-                }
-            }
-
-            return null;
-        }
+        
 
 
         function getCartId() {
-
-            let decoded_token = getDecodedToken("token")
-            let user_id = decoded_token["user_id"]
-
-
             $.ajax({
                 method: "GET",
-                url: `http://localhost:8000/api/user/${user_id}/`,
+                url: `http://localhost:8000/api/current-user/`,
                 success: (data) => {
                     cart_id = data["cart_id"]
                     console.log(cart_id)

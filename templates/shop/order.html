@@ -98,12 +98,27 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary">Complete Purchase</button>
+        <button type="button" class="btn btn-primary" onclick="confirmOrder()" >Complete Purchase</button>
       </div>
     </div>
   </div>
 </div>
-
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header bg-danger text-white">
+        <h5 class="modal-title" id="errorModalLabel">Error</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
+      </div>
+      <div class="modal-body" id="error-modal-body">
+        <!-- Error message goes here -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
+      </div>
+    </div>
+  </div>
+</div>
     </div>
 </div>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
@@ -132,21 +147,39 @@
 
         $(document).ready(() => {
 
-            getCartId()
-
+            getCartId();
+            getAllBookNames();
 
         })
 
 
+     function showErrorPopup(message) {
+    // Hide the confirmation modal first
+    const confirmModal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
+    if (confirmModal) {
+        confirmModal.hide();
+    }
+
+    // Manually remove leftover backdrop if it exists
+    $(".modal-backdrop").remove();
+    $("body").removeClass("modal-open");  // remove scroll lock
+    $("body").css("padding-right", "");   // reset body padding in case it's added
+
+    // Delay a bit before showing the new modal
+    setTimeout(() => {
+        $("#error-modal-body").text(message);
+        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    }, 200);
+}
+
         function getCartId(){
 
-        let decoded_token = getDecodedToken("token")
-            let user_id = decoded_token["user_id"]
 
 
             $.ajax({
                 method: "GET",
-                url: `http://localhost:8000/api/user/${user_id}/`,
+                url: `http://localhost:8000/api/current-user/`,
                 success: (data) =>  {
                     cart_id = data["cart_id"]
                     console.log(cart_id)
@@ -281,6 +314,34 @@
 
     $("#cart-items").append(emptyCard);
 }
+
+function confirmOrder(){
+        
+            console.log("Getting data from the server...");
+            $.ajax({
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    "cart_id": cart_id
+                }),
+                url: `http://localhost:8000/api/order/`,
+                success: (data) => {
+                    
+                    console.log("successful order");
+                    window.location.href = "/"
+                    {#$(".text-end .fw-bold").text(`$${(books.grand_total).toFixed(2)}`);#}
+                },
+                error: (xhr) => {
+                    console.log(xhr);
+                    let errorMsg = "Something went wrong!";
+            if (xhr.responseJSON && xhr.responseJSON.cart_id) {
+                errorMsg = xhr.responseJSON.cart_id[0];  // DRF sends errors as list per field
+            }
+            showErrorPopup(errorMsg);
+                }
+            });
+            
+        }
 
    
 

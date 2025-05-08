@@ -15,12 +15,9 @@
 
         $(document).ready(function profileDetails() {
 
-            const decodedToken = getDecodedToken("token")
-            const user_id = decodedToken.user_id
-            console.log(user_id)
 
             $.ajax({
-                url: `http://localhost:8000/api/user/${user_id}`,
+                url: `http://localhost:8000/api/current-user`,
                 type: 'GET',
                 success: function (user) {
                     console.log(user)

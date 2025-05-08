@@ -1,24 +1,22 @@
 from django.contrib.auth import get_user_model
-from django.db.models.fields import return_None
-from django.shortcuts import get_object_or_404
-from rest_framework.decorators import action
-from rest_framework.exceptions import NotFound
+from rest_framework.generics import RetrieveAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, DestroyModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-from urllib3 import Retry
 
 from Shop.api.authentication import CookieJWTAuthentication
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
-    CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer
+    CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer, \
+    OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer
 
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet
+from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
 
 from Shop.api.serializers import CartItemListSerializer
-from Shop.shop_app.models import Book, CartItem, Genre, Cart
+from Shop.shop_app.models import Book, CartItem, Genre, Cart, Order, OrderItems
 from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 
 import datetime
@@ -28,17 +26,19 @@ User = get_user_model()
 
 
 # NO NEED OF RETRIEVE SINCE WE ONLY USE THE CURRENT CART
-class CartViewSet(ModelViewSet):
+class CartViewSet(RetrieveModelMixin,ListModelMixin,GenericViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [AllowAny,]
 
 #
-class CartItemsViewSet(ModelViewSet):
+class CartItemsViewSet(CreateModelMixin,
+                   DestroyModelMixin,
+                   ListModelMixin,
+                   GenericViewSet):
     list_serializer = CartItemListSerializer
     create_serializer = CartItemCreateSerializer
-    update_serializer = CartItemUpdateSerializer
-    retrieve_serializer = CartRetrieveSerializer
+
 
     queryset = CartItem.objects.all()
     lookup_field = "id"
@@ -49,10 +49,10 @@ class CartItemsViewSet(ModelViewSet):
             return self.list_serializer
         if self.request.method == 'POST':
             return self.create_serializer
-        if self.request.method in ['PUT', 'PATCH']:
-            return self.update_serializer
-        if self.action == 'retrieve':
-            return self.retrieve_serializer
+        # if self.request.method in ['PUT', 'PATCH']:
+        #     return self.update_serializer
+        # if self.action == 'retrieve':
+        #     return self.retrieve_serializer
 
 
     def get_queryset(self):
@@ -63,8 +63,11 @@ class CartItemsViewSet(ModelViewSet):
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
-        context["cart_id"] = self.kwargs["cart_pk"]
-        return context
+        try:
+            context["cart_id"] = self.kwargs["cart_pk"]
+            return context
+        except Exception:
+            return context
 
 
 class BookReadOnlyViewSet(ReadOnlyModelViewSet):
@@ -121,11 +124,11 @@ class MyObtainTokenPairView(TokenObtainPairView):
         # HTTP SHOULD BE TRUE ???
         response.set_cookie(
             'token', access,
-            httponly=False, secure=True, samesite='Lax', expires=expires
+            httponly=True, secure=True, samesite='Lax', expires=expires
         )
         response.set_cookie(
             'refresh', refresh,
-            httponly=False, secure=True, samesite='Lax', expires=expires
+            httponly=True, secure=True, samesite='Lax', expires=expires
         )
 
         return response
@@ -133,22 +136,12 @@ class MyObtainTokenPairView(TokenObtainPairView):
 
 # WILL NEED FOR LATER
 
-class UserApiViewSet(ModelViewSet):
+class UserApiViewSet(CreateModelMixin,GenericViewSet):
     permission_classes = [AllowAny]
     authentication_classes = [CookieJWTAuthentication]
 
+    serializer_class = CreateUserSerializer
     queryset = User.objects.all()
-    create_user_serializer = CreateUserSerializer
-    get_user_serializer = GetUserSerializer
-    edit_user_serializer = EditUserSerializer
-
-    def get_serializer_class(self):
-        if self.request.method == "GET":
-            return self.get_user_serializer
-        if self.request.method == "POST":
-            return self.create_user_serializer
-        if self.request.method in ["PUT", "PATCH"]:
-            return self.edit_user_serializer
 
 
 class LogoutApiView(APIView):
@@ -165,6 +158,57 @@ class LogoutApiView(APIView):
         }
 
         return response
+
+class OrderViewSet(ListModelMixin,CreateModelMixin,GenericViewSet):
+
+    queryset = Order.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        old_query = super().get_queryset()
+        if user.is_staff:
+            return Order.objects.all()
+        else:
+            new_query = old_query.filter(owner=user)
+            return new_query
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return CreateOrderSerializer
+        return OrderSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context["user"] = self.request.user
+        return context
+
+
+# Not sure for that
+class OrderItemsViewSet(ListModelMixin,GenericViewSet):
+
+    serializer_class = OrderItemSerializer
+    queryset = OrderItems.objects.all()
+
+
+class CurrentUserViewSet(RetrieveUpdateDestroyAPIView):
+    permission_classes = [IsAuthenticated]
+
+    queryset = User.objects.all()
+    create_user_serializer = CreateUserSerializer
+    get_user_serializer = GetUserSerializer
+    edit_user_serializer = EditUserSerializer
+
+    def get_serializer_class(self):
+        if self.request.method == "GET":
+            return self.get_user_serializer
+        if self.request.method == "POST":
+            return self.create_user_serializer
+        if self.request.method in ["PUT", "PATCH"]:
+            return self.edit_user_serializer
+
+    def get_object(self):
+        return self.request.user
+
 
 
 

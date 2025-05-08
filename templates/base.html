@@ -48,7 +48,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link"  href="/product/order">
+                    <a class="nav-link" href="/product/order">
                         <i class="bi bi-bag"></i>
                     </a>
                 </li>
@@ -67,39 +67,7 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 
-
 <script>
-    function getDecodedToken(cookieName) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${cookieName}=`);
-
-        if (parts.length === 2) {
-            try {
-                const token = parts.pop().split(';').shift();
-                return jwt_decode(token);
-            } catch (error) {
-                console.warn("Failed to decode token:", error);
-            }
-        }
-
-        return null;
-    }
-
-    function getCookie(cookieName) {
-        const value = `; ${document.cookie}`;
-        const parts = value.split(`; ${cookieName}=`);
-
-        if (parts.length === 2) {
-            try {
-                return parts.pop().split(';').shift();
-            } catch (error) {
-                console.warn("Failed to decode token:", error);
-            }
-        }
-
-        return null;
-    }
-
     
     function renderAccountMenu(isAuthenticated, userId) {
         const $menu = $('#account-menu');
@@ -122,13 +90,9 @@
     }
 
     $(document).ready(function () {
-        let decoded = getDecodedToken("token");
-
-        if (decoded) {
-            let user_id = decoded.user_id;
 
             $.ajax({
-                url: `http://localhost:8000/api/user/${user_id}`,
+                url: "http://localhost:8000/api/current-user/",
                 method: "GET",
                 xhrFields: {
                     withCredentials: true
@@ -136,17 +100,13 @@
                 success: function (data) {
                     const username = data["email"];
                     $('#username-display').text(username).css('visibility', 'visible');
-                    renderAccountMenu(true, user_id);
+                    renderAccountMenu(true, data.id);
                 },
                 error: function () {
                     $('#username-display').text("Account").css('visibility', 'visible');
                     renderAccountMenu(false);
                 }
             });
-        } else {
-            $('#username-display').text("Account").css('visibility', 'visible');
-            renderAccountMenu(false);
-        }
 
         $.ajax({
             type: 'GET',

@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from Shop.shop_app.models import Book, Genre, Profile, Cart, CartItem
+from Shop.shop_app.models import Book, Genre, Profile, Cart, CartItem, Order, OrderItems
 
 
 # Register your models here.
@@ -23,6 +23,14 @@ class CartItemAdmin(admin.ModelAdmin):
 
 @admin.register(Cart)
 class CartAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    pass
+
+@admin.register(OrderItems)
+class OrderItemsAdmin(admin.ModelAdmin):
     pass
 
 
