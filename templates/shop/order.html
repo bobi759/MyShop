@@ -15,77 +15,65 @@
     <div class="container">
         <div class="row">
             <div class="col-xl-8">
-                <div id="cart-items">
-                
+                <!-- Empty Cart Message -->
+                <div id="cart-empty-message" class="text-center text-muted my-5" style="display: none; padding-bottom: 60px;">
+                    <h4>No books yet</h4>
+                    <p>Your cart is empty. Add some books to see them here!</p>
                 </div>
 
-
+                <!-- Cart Items -->
+                <div id="cart-items"></div>
 
                 <div class="row my-4">
                     <div class="col-sm-6">
                         <a href="{% url 'products' %}" class="btn btn-link text-muted">
                             <i class="mdi mdi-arrow-left me-1"></i> Continue Shopping
                         </a>
-                    </div> <!-- end col -->
+                    </div>
                     <div class="col-sm-6">
                         <div class="text-sm-end mt-2 mt-sm-0">
                             <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" title="Proceed to Checkout">
                                 <i class="mdi mdi-cart-outline me-2"></i> Proceed to Checkout
                             </a>
                         </div>
-                    </div> <!-- end col -->
-                </div> <!-- end row-->
+                    </div>
+                </div>
             </div>
 
             <div class="col-xl-4">
                 <div class="mt-5 mt-lg-0">
                     <div class="card border shadow-none">
                         <div class="card-header bg-transparent border-bottom py-3 px-4">
-                            <h5 class="font-size-16 mb-0">Order Summary <span class="float-end">#MN0124</span></h5>
+                            <h5 class="font-size-16 mb-0">Order Summary</h5>
                         </div>
                         <div class="card-body p-4 pt-2">
-
                             <div class="table-responsive">
                                 <table class="table mb-0">
                                     <tbody>
-                                    <tr>
-                                        <td>Sub Total :</td>
-                                        <td class="text-end">$ 780</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Discount :</td>
-                                        <td class="text-end">- $ 78</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Shipping Charge :</td>
-                                        <td class="text-end">$ 25</td>
-                                    </tr>
-                                    <tr>
-                                        <td>Estimated Tax :</td>
-                                        <td class="text-end">$ 18.20</td>
-                                    </tr>
-                                    <tr class="bg-light">
-                                        <th>Total :</th>
-                                        <td class="text-end">
-                                            <span class="fw-bold">
-                                                $ 745.2
-                                            </span>
-                                        </td>
-                                    </tr>
+                                        <tr>
+                                            <td>Sub Total :</td>
+                                            <td class="text-end order-summary-subtotal">$0.00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>Discount :</td>
+                                            <td class="text-end order-summary-discount">- $0.00</td>
+                                        </tr>
+                                        <tr class="bg-light">
+                                            <th>Total :</th>
+                                            <td class="text-end">
+                                                <span class="fw-bold order-summary-total">$0.00</span>
+                                            </td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
-                            <!-- end table-responsive -->
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-
-       <!-- Button trigger modal -->
-
-<!-- Modal -->
+<!-- Confirmation Modal -->
 <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -103,6 +91,8 @@
     </div>
   </div>
 </div>
+
+<!-- Error Modal -->
 <div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -110,62 +100,34 @@
         <h5 class="modal-title" id="errorModalLabel">Error</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
       </div>
-      <div class="modal-body" id="error-modal-body">
-        <!-- Error message goes here -->
-      </div>
+      <div class="modal-body" id="error-modal-body"></div>
       <div class="modal-footer">
         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
       </div>
     </div>
   </div>
 </div>
-    </div>
 </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+</div>
+
+<!-- Scripts -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
 
-    <script>
+<script>
+let cart_id;
 
-        function getDecodedToken(cookieName) {
-        const value = `; e${document.cookie}`;
-        const parts = value.split(`; ${cookieName}=`);
+$(document).ready(() => {
+    getCartId();
+});
 
-        if (parts.length === 2) {
-            try {
-                let token = parts.pop().split(';').shift();
-                return jwt_decode(token);
-            } catch (error) {
-                console.warn("Failed to decode token:", error);
-            }
-        }
-
-        return null;
-    }
-
-    let cart_id;
-
-        $(document).ready(() => {
-
-            getCartId();
-            getAllBookNames();
-
-        })
-
-
-     function showErrorPopup(message) {
-    // Hide the confirmation modal first
+function showErrorPopup(message) {
     const confirmModal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-    if (confirmModal) {
-        confirmModal.hide();
-    }
-
-    // Manually remove leftover backdrop if it exists
+    if (confirmModal) confirmModal.hide();
     $(".modal-backdrop").remove();
-    $("body").removeClass("modal-open");  // remove scroll lock
-    $("body").css("padding-right", "");   // reset body padding in case it's added
+    $("body").removeClass("modal-open").css("padding-right", "");
 
-    // Delay a bit before showing the new modal
     setTimeout(() => {
         $("#error-modal-body").text(message);
         const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
@@ -173,179 +135,136 @@
     }, 200);
 }
 
-        function getCartId(){
-
-
-
-            $.ajax({
-                method: "GET",
-                url: `http://localhost:8000/api/current-user/`,
-                success: (data) =>  {
-                    cart_id = data["cart_id"]
-                    console.log(cart_id)
-                    getAllBookNames();
-                },
-                error: (error) => {
-                    console.log(error);
-                }
-            });
-
+function getCartId() {
+    $.ajax({
+        method: "GET",
+        url: `http://localhost:8000/api/current-user/`,
+        success: (data) => {
+            cart_id = data["cart_id"];
+            getAllBookNames();
+        },
+        error: (error) => {
+            console.log(error);
         }
-
-
-        
-        $('#exampleModal').on('shown.bs.modal', function () {
-            $('#exampleModalInput').trigger('focus');
-        });
-
-        function hideFunc() {
-    const modalElement = document.getElementById('exampleModal');
-    const modalInstance = bootstrap.Modal.getOrCreateInstance(modalElement);
-    modalInstance.hide();
+    });
 }
 
-            
+function getAllBookNames() {
+    $.ajax({
+        method: "GET",
+        url: `http://localhost:8000/api/cart/${cart_id}/`,
+        success: (cart) => {
+            const books = cart["items"];
+            const cartItemsContainer = $("#cart-items");
+            cartItemsContainer.empty(); // Clear previous content
 
-            
-        function deleteItem(item_id) {
-            let $crf_token = $('[name="csrfmiddlewaretoken"]').attr('value');
-            
-            
+            if (books.length === 0) {
+                $("#cart-empty-message").show();
+            } else {
+                $("#cart-empty-message").hide();
+                books.forEach(item => {
+                    addEmptyCard(item);
+                });
+            }
 
-            $.ajax({
-                method: "DELETE",
-                url: `http://localhost:8000/api/cart/${cart_id}/items/${item_id}/`,
-                
-                headers: {
-                    "X-CSRFToken": $crf_token,
-                    "Content-Type": "application/json",
-                },
-                success: (data) =>  {
-                    console.log(data);
-                    $(`#cart-item-${item_id}`).parent().remove();
-                    {#$(".text-end .fw-bold").text(`$${(data.new_total_price).toFixed(2)}`);#}
-                },
-                error: (error) => {
-                    console.log(error);
-                }
-            });
-
+            $(".order-summary-subtotal").text(`$${cart.grand_total}`);
+            $(".order-summary-total").text(`$${cart.grand_total}`);
+        },
+        error: (error) => {
+            console.log(error);
         }
+    });
+}
 
-
-        function getAllBookNames() {
-            console.log("Getting data from the server...");
-            $.ajax({
-                method: "GET",
-                url: `http://localhost:8000/api/cart/${cart_id}/items/`,
-                success: (books) => {
-                        console.log(books)
-                    books.forEach(item => {
-                        addEmptyCard(item);
-                    });
-                    {#$(".text-end .fw-bold").text(`$${(books.grand_total).toFixed(2)}`);#}
-                },
-                error: (error) => {
-                    console.log(error);
-                }
-            });
-        }
-
-
-
-
-        function addEmptyCard(item) {
-    console.log("Adding a card...");
-
-    let emptyCard = `
+function addEmptyCard(item) {
+    let cardHTML = `
         <div class="card border shadow-none">
             <div class="card-body" id="cart-item-${item.id}">
                 <div class="d-flex align-items-start border-bottom pb-3">
                     <div class="me-4">
-                        <img src="${item.product.image}" alt="Product Image"
-                             class="avatar-lg rounded">
+                        <img src="${item.product.image}" alt="Product Image" class="avatar-lg rounded">
                     </div>
                     <div class="flex-grow-1 align-self-center overflow-hidden">
-                        <div>
-                            <h5 class="text-truncate font-size-18">
-                                <a href="#" class="text-dark">${item.product.title}</a>
-                            </h5>
-                            <p class="text-muted mb-0">
-                                <i class="bx bxs-star text-warning"></i>
-                                <i class="bx bxs-star text-warning"></i>
-                                <i class="bx bxs-star text-warning"></i>
-                                <i class="bx bxs-star text-warning"></i>
-                                <i class="bx bxs-star-half text-warning"></i>
-                            </p>
-                            <p class="mb-0 mt-1">Genre :
-                                <span class="fw-medium">${item.product.genre.name}</span>
-                            </p>
-                            <p class="mb-0 mt-1">Quantity :
-                                <span class="fw-medium">${item.quantity}</span>
-                            </p>
-                        </div>
+                        <h5 class="text-truncate font-size-18">
+                            <a href="#" class="text-dark">${item.product.title}</a>
+                        </h5>
+                        <p class="text-muted mb-0">
+                            <i class="bx bxs-star text-warning"></i><i class="bx bxs-star text-warning"></i>
+                            <i class="bx bxs-star text-warning"></i><i class="bx bxs-star text-warning"></i>
+                            <i class="bx bxs-star-half text-warning"></i>
+                        </p>
+                        <p class="mb-0 mt-1">Genre : <span class="fw-medium">${item.product.genre.name}</span></p>
+                        <p class="mb-0 mt-1">Quantity : <span class="fw-medium">${item.quantity}</span></p>
                     </div>
                     <div class="flex-shrink-0 ms-2">
                         <ul class="list-inline mb-0 font-size-16">
                             <li class="list-inline-item delete-obj">
-                                <a href="#" data-product-id="${item.id}" class="text-muted px-1" onclick="deleteItem(${item.id})">
+                                <a href="#" class="text-muted px-1" onclick="deleteItem(${item.id})">
                                     <i class="mdi mdi-trash-can-outline"></i>
                                 </a>
                             </li>
                         </ul>
                     </div>
                 </div>
-
-<div class="row align-items-center mt-3 px-3">
-    <div class="col">
-        <label class="form-label">Price</label>
-        <h5>$${item.product.price}</h5>
-    </div>
-    <div class="col text-end">
-        <label class="form-label">Total</label>
-        <h5 id="total-price-${item.id}">$${item.subtotal.toFixed(2)}</h5>
-    </div>
-</div>
-
-
+                <div class="row align-items-center mt-3 px-3">
+                    <div class="col">
+                        <label class="form-label">Price</label>
+                        <h5>$${item.product.price}</h5>
+                    </div>
+                    <div class="col text-end">
+                        <label class="form-label">Total</label>
+                        <h5 id="total-price-${item.id}">$${item.subtotal.toFixed(2)}</h5>
+                    </div>
+                </div>
             </div>
         </div>
     `;
-
-    $("#cart-items").append(emptyCard);
+    $("#cart-items").append(cardHTML);
 }
 
-function confirmOrder(){
-        
-            console.log("Getting data from the server...");
-            $.ajax({
-                method: "POST",
-                contentType: "application/json",
-                data: JSON.stringify({
-                    "cart_id": cart_id
-                }),
-                url: `http://localhost:8000/api/order/`,
-                success: (data) => {
-                    
-                    console.log("successful order");
-                    window.location.href = "/"
-                    {#$(".text-end .fw-bold").text(`$${(books.grand_total).toFixed(2)}`);#}
-                },
-                error: (xhr) => {
-                    console.log(xhr);
-                    let errorMsg = "Something went wrong!";
+function deleteItem(item_id) {
+    const $crf_token = $('[name="csrfmiddlewaretoken"]').val();
+
+    $.ajax({
+        method: "DELETE",
+        url: `http://localhost:8000/api/cart/${cart_id}/items/${item_id}/`,
+        headers: {
+            "X-CSRFToken": $crf_token,
+            "Content-Type": "application/json",
+        },
+        success: (data) => {
+            $(`#cart-item-${item_id}`).parent().remove();
+            $(".order-summary-subtotal").text(`$${data.new_total_price}`);
+            $(".order-summary-total").text(`$${data.new_total_price}`);
+
+            // Re-check if cart is empty after deletion
+            if ($("#cart-items").children().length === 0) {
+                $("#cart-empty-message").show();
+            }
+        },
+        error: (error) => {
+            console.log(error);
+        }
+    });
+}
+
+function confirmOrder() {
+    $.ajax({
+        method: "POST",
+        contentType: "application/json",
+        data: JSON.stringify({ "cart_id": cart_id }),
+        url: `http://localhost:8000/api/order/`,
+        success: () => {
+            window.location.href = "/";
+        },
+        error: (xhr) => {
+            let errorMsg = "Something went wrong!";
             if (xhr.responseJSON && xhr.responseJSON.cart_id) {
-                errorMsg = xhr.responseJSON.cart_id[0];  // DRF sends errors as list per field
+                errorMsg = xhr.responseJSON.cart_id[0];
             }
             showErrorPopup(errorMsg);
-                }
-            });
-            
         }
-
-   
-
-    </script>
-
-
+    });
+}
+</script>
 {% endblock %}

@@ -44,7 +44,7 @@ from rest_framework_nested import routers
 from Shop.api.views import (
     CartViewSet, BookReadOnlyViewSet, GenreReadOnlyViewSet,
     LogoutApiView, MyObtainTokenPairView, UserApiViewSet,
-    CartItemsViewSet, OrderViewSet, OrderItemsViewSet, CurrentUserViewSet
+    CartItemsViewSet, OrderViewSet, OrderItemsViewSet, CurrentUserViewSet, BookReviewsModelViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -60,7 +60,6 @@ from rest_framework_simplejwt.views import TokenRefreshView
 
 # Base router
 router = routers.DefaultRouter()
-router.register(r'book', BookReadOnlyViewSet)
 router.register(r'genre', GenreReadOnlyViewSet)
 router.register(r'user', UserApiViewSet)
 
@@ -72,15 +71,22 @@ router.register(r'cart', CartViewSet, basename='cart')
 cart_router = routers.NestedDefaultRouter(router,'cart',lookup="cart")
 cart_router.register("items",CartItemsViewSet,basename='cart-items')
 
+
+router.register(r'book', BookReadOnlyViewSet)
+book_router = routers.NestedDefaultRouter(router,parent_prefix='book',lookup='book')
+book_router.register("reviews",BookReviewsModelViewSet,basename='book-reviews')
+
 router.register(r'order',OrderViewSet)
 
 
 router.register(r'order-items', OrderItemsViewSet)
 
 
+
 urlpatterns = [
     path('', include(router.urls)),
     path('', include(cart_router.urls)),
+    path('',include(book_router.urls)),
     path('current-user/',CurrentUserViewSet.as_view()),
 
     # path('', include(user_cart_router.urls)),

@@ -13,6 +13,7 @@ User = get_user_model()
 class CreateProfile(FlexibleJWTAuthMixin, TemplateView):
     allow_authenticated = False
     unauthorized_user_redirect = reverse_lazy("home page")
+    unauthenticated_user_redirect = None
     template_name = 'account/register.html'
     extra_context = {"form": CreateProfileForm}
 
@@ -20,6 +21,7 @@ class CreateProfile(FlexibleJWTAuthMixin, TemplateView):
 class LoginUser(FlexibleJWTAuthMixin, TemplateView):
     allow_authenticated = False
     unauthorized_user_redirect = reverse_lazy("home page")
+    unauthenticated_user_redirect = None
     template_name = 'account/login.html'
     extra_context = {"form": AuthenticationForm}
 

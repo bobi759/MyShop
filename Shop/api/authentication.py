@@ -15,8 +15,12 @@ class CookieJWTAuthentication(JWTAuthentication):
         if raw_token is None:
             return None
 
-        validated_token = self.get_validated_token(raw_token)
-        return self.get_user(validated_token), validated_token
+        try:
+            validated_token = self.get_validated_token(raw_token)
+            return self.get_user(validated_token), validated_token
+        except Exception:
+            # Fail silently — treat as unauthenticated if token is invalid
+            return None
 
 
 class JWTUserAuthMixin:
@@ -46,22 +50,21 @@ class FlexibleJWTAuthMixin(JWTUserAuthMixin):
 
     def dispatch(self, request, *args, **kwargs):
         try:
-            # There is user
             user = self.authenticate_and_assign_user(request)
-            # if user:
             if user:
                 if not self.allow_authenticated:
-                    return HttpResponseRedirect(self.get_unauthorized_user_redirect(),status=HTTP_302_FOUND)
+                    return HttpResponseRedirect(self.get_unauthorized_user_redirect(), status=HTTP_302_FOUND)
             else:
-            # no user
                 if self.allow_authenticated:
-                    return HttpResponseRedirect(self.get_unauthenticated_user_redirect(),status=HTTP_302_FOUND)
+                    redirect_url = self.get_unauthenticated_user_redirect()
+                    if redirect_url:
+                        return HttpResponseRedirect(redirect_url, status=HTTP_302_FOUND)
+                    # If no redirect is set, allow normal view processing
             return super().dispatch(request, *args, **kwargs)
 
         except Exception:
-        # if something goes wrong
-            return HttpResponseRedirect(self.get_unauthenticated_user_redirect())
-
+            redirect_url = self.get_unauthenticated_user_redirect()
+            return HttpResponseRedirect(redirect_url) if redirect_url else super().dispatch(request, *args, **kwargs)
 
 
 class EnsureOwnProfileMixin(JWTUserAuthMixin):

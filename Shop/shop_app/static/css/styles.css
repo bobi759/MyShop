@@ -69,6 +69,34 @@ body {
     background-color: rgba(0, 0, 0, 0.05); /* Light hover effect */
 }
 
+.book-image {
+    width: 100%;
+    max-width: 350px;
+    height: 550px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+#carouselExampleControls{
+background: radial-gradient(circle at center, #ffffff, #fdfcfa, #faf7f3);
+    padding: 60px 20px;
+    border-radius: 16px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    margin-top: 50px;
+}
+
+/* Fix carousel height to prevent resizing/jumping */
+.carousel-inner {
+    min-height: 350px; /* Adjust to match tallest testimonial */
+    ;
+}
+
+
+
+
+
+
 .container.col-xxl-8 {
     margin-top: 80px;
 }

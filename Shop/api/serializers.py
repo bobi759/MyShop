@@ -9,7 +9,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.serializers import ModelSerializer
 import uuid
 
-from Shop.shop_app.models import Genre, Book, Cart, CartItem, Profile, Order, OrderItems
+from Shop.shop_app.models import Genre, Book, Cart, CartItem, Profile, Order, OrderItems, BookReview
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -247,4 +247,16 @@ class TestUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ("id","email","profile")
+
+
+class BookReviewsSerializer(ModelSerializer):
+
+    book = BookSerializer()
+    user = GetUserSerializer()
+
+    class Meta:
+
+        model = BookReview
+        fields = ("id","title","description","created_on","user","book")
+
 

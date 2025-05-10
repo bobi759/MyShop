@@ -55,8 +55,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         # 'rest_framework_simplejwt.authentication.JWTStatelessUserAuthentication',
         # 'rest_framework_simplejwt.authentication.JWTAuthentication'
+        # 'Shop.api.authentication.CookieJWTAuthentication',
         'Shop.api.authentication.CookieJWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
+
+    ),
+    #
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.AllowAny',
     ),
     # 'DEFAULT_PERMISSION_CLASSES': (
     #     'rest_framework.permissions.IsAuthenticated',
@@ -125,8 +131,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 SIMPLE_JWT = {
-    # FIX TIMEDELTA TO 5 MIN
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=5),
+    "ACCESS_TOKEN_LIFETIME": timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME": timedelta(days=1),
     "ROTATE_REFRESH_TOKENS": True,
     "BLACKLIST_AFTER_ROTATION": True,
@@ -190,10 +195,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = "account.CustomUser"
-
-# LOGIN_REDIRECT_URL = reverse_lazy("home page")
-
-# LOGOUT_REDIRECT_URL = reverse_lazy("home page")
 
 LOGIN_URL = reverse_lazy("login profile")
 

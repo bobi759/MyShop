@@ -10,10 +10,18 @@ class AboutView(TemplateView):
 class Products(TemplateView):
     template_name = "shop/products.html"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data()
+        return context
 
 # BOOK DETAILS
 class BookDetailView(FlexibleJWTAuthMixin, TemplateView):
     template_name = 'shop/book-details.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['book_id'] = self.kwargs['pk']
+        return context
 
 
 # ORDER VIEW

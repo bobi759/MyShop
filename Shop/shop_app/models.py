@@ -82,6 +82,7 @@ class Profile(models.Model):
         User,
         on_delete=models.CASCADE,
         primary_key=True,
+        related_name="profile"
     )
 
 
@@ -147,3 +148,17 @@ class OrderItems(models.Model):
     def __str__(self):
         return self.product.title
 
+
+class BookReview(models.Model):
+
+    MAX_TITLE_LENGTH = 50
+
+    title = models.CharField(max_length=MAX_TITLE_LENGTH)
+    description = models.TextField()
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    book = models.ForeignKey(Book,on_delete=models.CASCADE)
+    created_on = models.DateTimeField(auto_now_add=True)
+    # rating
+
+    def __str__(self):
+        return f"{self.user.profile.first_name} {self.user.profile.last_name} wrote review on {self.book.title} titled {self.title}"

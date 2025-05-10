@@ -10,14 +10,14 @@ from rest_framework_simplejwt.views import TokenObtainPairView
 from Shop.api.authentication import CookieJWTAuthentication
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
     CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer, \
-    OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer
+    OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer, BookReviewsSerializer
 
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
 
 from Shop.api.serializers import CartItemListSerializer
-from Shop.shop_app.models import Book, CartItem, Genre, Cart, Order, OrderItems
-from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
+from Shop.shop_app.models import Book, CartItem, Genre, Cart, Order, OrderItems, BookReview
+from rest_framework.parsers import JSONParser
 
 import datetime
 from rest_framework import status
@@ -26,20 +26,18 @@ User = get_user_model()
 
 
 # NO NEED OF RETRIEVE SINCE WE ONLY USE THE CURRENT CART
-class CartViewSet(RetrieveModelMixin,ListModelMixin,GenericViewSet):
+class CartViewSet(ModelViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
-    permission_classes = [AllowAny,]
 
 #
-class CartItemsViewSet(CreateModelMixin,
-                   DestroyModelMixin,
-                   ListModelMixin,
-                   GenericViewSet):
+class CartItemsViewSet(ModelViewSet):
     list_serializer = CartItemListSerializer
     create_serializer = CartItemCreateSerializer
+    permission_classes = [AllowAny]
 
 
+    serializer_class = CartItemCreateSerializer  # <- Make sure this is set
     queryset = CartItem.objects.all()
     lookup_field = "id"
     parser_classes = [JSONParser, ]
@@ -49,11 +47,7 @@ class CartItemsViewSet(CreateModelMixin,
             return self.list_serializer
         if self.request.method == 'POST':
             return self.create_serializer
-        # if self.request.method in ['PUT', 'PATCH']:
-        #     return self.update_serializer
-        # if self.action == 'retrieve':
-        #     return self.retrieve_serializer
-
+        return self.list_serializer  # fallback serializer for GET (retrieve), PUT, PATCH, DELETE
 
     def get_queryset(self):
         old_queryset = super().get_queryset()
@@ -69,6 +63,19 @@ class CartItemsViewSet(CreateModelMixin,
         except Exception:
             return context
 
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        cart_id = instance.cart_id
+        self.perform_destroy(instance)
+
+        # Get updated cart total
+        try:
+            cart = Cart.objects.get(id=cart_id)
+            total = cart.total_price
+        except Cart.DoesNotExist:
+            total = 0
+
+        return Response({'new_total_price': total}, status=status.HTTP_200_OK)
 
 class BookReadOnlyViewSet(ReadOnlyModelViewSet):
     authentication_classes = []
@@ -77,27 +84,11 @@ class BookReadOnlyViewSet(ReadOnlyModelViewSet):
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        # genre = self.request.query_params.get("genre",None)
-        # new_query = Book.objects.filter(genre__name=genre)
-        # if new_query:
-        #     return new_query
-        # return self.queryset
-
-        genre = self.request.query_params.get("genre")
-        if genre:
-            # Check if the genre exists in the database
-            try:
-                # Filter by genre name if it exists
-                genre_obj = Genre.objects.get(name=genre)
-                return Book.objects.filter(genre=genre_obj)
-            except Genre.DoesNotExist:
-                # If genre doesn't exist, you can either:
-                # 1. Return an empty queryset
-                return Book.objects.none()
-                # 2. Or, raise a NotFound error with a custom message
-                # raise NotFound(detail="Genre not found")
-        # If no genre is provided, return all books
-        return Book.objects.all()
+        genre = self.request.query_params.get("genre",None)
+        new_query = Book.objects.filter(genre__name=genre)
+        if new_query:
+            return new_query
+        return self.queryset
 
 
 class GenreReadOnlyViewSet(ReadOnlyModelViewSet):
@@ -136,9 +127,9 @@ class MyObtainTokenPairView(TokenObtainPairView):
 
 # WILL NEED FOR LATER
 
-class UserApiViewSet(CreateModelMixin,GenericViewSet):
+class UserApiViewSet(ModelViewSet):
     permission_classes = [AllowAny]
-    authentication_classes = [CookieJWTAuthentication]
+    # authentication_classes = [CookieJWTAuthentication]
 
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
@@ -150,8 +141,8 @@ class LogoutApiView(APIView):
 
     def post(self, request):
         response = Response()
-        response.delete_cookie("refresh")
-        response.delete_cookie("token")
+        response.delete_cookie('token', path='/', samesite='Lax')
+        response.delete_cookie('refresh', path='/', samesite='Lax')
 
         response.data = {
             'message': 'success'
@@ -159,7 +150,7 @@ class LogoutApiView(APIView):
 
         return response
 
-class OrderViewSet(ListModelMixin,CreateModelMixin,GenericViewSet):
+class OrderViewSet(ModelViewSet):
 
     queryset = Order.objects.all()
 
@@ -184,7 +175,7 @@ class OrderViewSet(ListModelMixin,CreateModelMixin,GenericViewSet):
 
 
 # Not sure for that
-class OrderItemsViewSet(ListModelMixin,GenericViewSet):
+class OrderItemsViewSet(ModelViewSet):
 
     serializer_class = OrderItemSerializer
     queryset = OrderItems.objects.all()
@@ -208,6 +199,18 @@ class CurrentUserViewSet(RetrieveUpdateDestroyAPIView):
 
     def get_object(self):
         return self.request.user
+
+
+class BookReviewsModelViewSet(ModelViewSet):
+
+    serializer_class = BookReviewsSerializer
+    queryset = BookReview.objects.all()
+
+    def get_queryset(self):
+        book_id = self.kwargs.get('book_pk',None)
+        old_queryset = super().get_queryset()
+        new_queryset = old_queryset.filter(book__id=book_id)
+        return new_queryset[:3]
 
 
 
