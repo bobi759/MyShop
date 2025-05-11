@@ -97,6 +97,7 @@ background: radial-gradient(circle at center, #ffffff, #fdfcfa, #faf7f3);
 
 
 
+
 .container.col-xxl-8 {
     margin-top: 80px;
 }
@@ -109,6 +110,16 @@ background: radial-gradient(circle at center, #ffffff, #fdfcfa, #faf7f3);
 
 .order-wrapper {
     margin-top: 50px;
+}
+
+
+
+body.modal-open {
+    overflow: hidden;
+}
+
+body {
+    overflow: auto !important;
 }
 
 

@@ -27,6 +27,7 @@
     <orderEntry type="library" name="jquery-3.6.0" level="application" />
     <orderEntry type="library" name="jwt-decode" level="application" />
     <orderEntry type="library" name="mdb-ui-kit" level="application" />
+    <orderEntry type="library" name="platform" level="application" />
   </component>
   <component name="TemplatesService">
     <option name="TEMPLATE_CONFIGURATION" value="Django" />

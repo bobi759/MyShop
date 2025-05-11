@@ -8,10 +8,11 @@
     <div class="container mt-5">
         <div class="row" id="book-details-row"></div>
 
+
         <h1 class="text-center fw-bold mb-4" style="margin-top: 20px;">What Our Readers Say</h1>
         <div id="carouselExampleControls" class="carousel slide text-center carousel-dark" data-bs-ride="carousel">
             <div class="carousel-inner" id="reviews-carousel-inner">
-                <!-- JS will insert review items here -->
+
             </div>
 
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls"
@@ -26,6 +27,62 @@
             </button>
         </div>
 
+        <div class="text-center mt-4">
+            <button class="btn btn-success px-4 py-2 rounded-pill" data-bs-toggle="modal" data-bs-target="#reviewModal">
+                Write a Review
+            </button>
+        </div>
+
+
+        <div class="modal fade" id="reviewModal" tabindex="-1" aria-labelledby="reviewModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-slideout modal-lg modal-fullscreen-sm-down">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="reviewModalLabel">Write a Review</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="review-form">
+                            <div class="mb-3">
+                                <label for="review-title" class="form-label">Title</label>
+                                <input type="text" class="form-control" id="review-title"
+                                       placeholder="Give your review a title" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="review-description" class="form-label">Description</label>
+                                <textarea class="form-control" id="review-description" rows="5"
+                                          placeholder="Share your thoughts..." required></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-primary px-4" onclick="postReview()">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content border-danger">
+                    <div class="modal-header bg-danger text-white">
+                        <h5 class="modal-title" id="errorModalLabel">Incomplete Review</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                                aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Both the <strong>Title</strong> and <strong>Description</strong> are required to submit a
+                        review.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-danger" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
     </div>
 
     <!-- Scripts -->
@@ -36,12 +93,11 @@
             integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
             crossorigin="anonymous"></script>
 
-
     <script>
+        let user_id;
         let cart_id;
         const book_id = {{ book_id }};
         const csrfToken = document.getElementById('csrf-token').value;
-
 
         function loadBookDetails(book) {
             let bookDetails = `
@@ -67,6 +123,12 @@
             </form>
             <h4 class="mt-4">Book Details <span class="text-muted">📖</span></h4>
             <p>${book.description}</p>
+            <!-- OPTION 1: Button under book description -->
+            <!--
+            <div class="mt-3">
+                <button class="btn btn-outline-primary px-4 py-2 rounded-pill">Write a Review</button>
+            </div>
+            -->
         </div>`;
             $("#book-details-row").html(bookDetails);
         }
@@ -77,7 +139,6 @@
                 url: `http://localhost:8000/api/book/${book_id}`,
                 success: (book) => {
                     console.log(book)
-
                     loadBookDetails(book)
                 },
                 error: function (xhr) {
@@ -117,6 +178,7 @@
                 url: "http://localhost:8000/api/current-user/",
                 success: (data) => {
                     cart_id = data["cart_id"];
+                    user_id = data["id"]
                 },
                 error: (error) => {
                     console.log(error);
@@ -178,6 +240,58 @@
                 },
                 error: function (xhr) {
                     console.error("Error loading reviews:", xhr.responseText);
+                }
+            });
+        }
+
+        function postReview() {
+            const title = document.getElementById("review-title").value.trim();
+            const description = document.getElementById("review-description").value.trim();
+
+            if (!title || !description) {
+                const reviewModalEl = document.getElementById('reviewModal');
+                const reviewModalInstance = bootstrap.Modal.getInstance(reviewModalEl);
+                if (reviewModalInstance) {
+                    reviewModalInstance.hide();
+                }
+
+                reviewModalEl.addEventListener('hidden.bs.modal', function () {
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                }, {once: true});
+
+                return;
+            }
+
+            $.ajax({
+                method: "POST",
+                url: `http://localhost:8000/api/book/${book_id}/reviews/`,
+                headers: {
+                    "X-CSRFToken": csrfToken,
+                    "Content-Type": "application/json",
+                },
+                data: JSON.stringify({
+                    title: title,
+                    description: description,
+                    book: book_id,
+                    user: user_id
+                }),
+                success: function () {
+                    const reviewModalEl = document.getElementById('reviewModal');
+                    const modalInstance = bootstrap.Modal.getInstance(reviewModalEl);
+                    modalInstance.hide();
+
+                    document.body.classList.remove('modal-open');
+                    document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+
+                    loadReviews();
+                    document.getElementById("review-form").reset();
+                },
+                error: function (xhr) {
+
                 }
             });
         }

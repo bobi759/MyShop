@@ -24,6 +24,14 @@ class BookDetailView(FlexibleJWTAuthMixin, TemplateView):
         return context
 
 
+class BookReviewView(FlexibleJWTAuthMixin, TemplateView):
+    template_name = 'shop/book-review.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['book_id'] = self.kwargs['pk']
+        return context
+
 # ORDER VIEW
 class OrderView(FlexibleJWTAuthMixin, TemplateView):
     allow_authenticated = True

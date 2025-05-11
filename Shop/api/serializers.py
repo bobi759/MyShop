@@ -260,3 +260,25 @@ class BookReviewsSerializer(ModelSerializer):
         fields = ("id","title","description","created_on","user","book")
 
 
+class BookPostReviewSerializer(ModelSerializer):
+
+    class Meta:
+        model = Book
+        fields = ("id",)
+
+
+class UserPostReviewSerializer(ModelSerializer):
+    class Meta:
+        model = User
+        fields = ("id",)
+
+class BookReviewPostSerializer(ModelSerializer):
+
+    book = BookPostReviewSerializer
+    user = UserPostReviewSerializer
+
+    class Meta:
+        model = BookReview
+        fields = ("title","description","book","user")
+
+

@@ -8,9 +8,11 @@ from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 from Shop.api.authentication import CookieJWTAuthentication
+from Shop.api.permissions import RestrictApiPermission
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
     CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer, \
-    OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer, BookReviewsSerializer
+    OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer, BookReviewsSerializer, \
+    BookReviewPostSerializer
 
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
@@ -78,10 +80,10 @@ class CartItemsViewSet(ModelViewSet):
         return Response({'new_total_price': total}, status=status.HTTP_200_OK)
 
 class BookReadOnlyViewSet(ReadOnlyModelViewSet):
-    authentication_classes = []
 
     queryset = Book.objects.all()
     serializer_class = BookSerializer
+    authentication_classes = []
 
     def get_queryset(self):
         genre = self.request.query_params.get("genre",None)
@@ -128,8 +130,9 @@ class MyObtainTokenPairView(TokenObtainPairView):
 # WILL NEED FOR LATER
 
 class UserApiViewSet(ModelViewSet):
-    permission_classes = [AllowAny]
     # authentication_classes = [CookieJWTAuthentication]
+    permission_classes = [RestrictApiPermission]
+
 
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
@@ -211,6 +214,13 @@ class BookReviewsModelViewSet(ModelViewSet):
         old_queryset = super().get_queryset()
         new_queryset = old_queryset.filter(book__id=book_id)
         return new_queryset[:3]
+
+    def get_serializer_class(self):
+        if self.request.method == "POST":
+            return BookReviewPostSerializer
+        return BookReviewsSerializer
+
+
 
 
 
