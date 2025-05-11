@@ -1,14 +1,15 @@
 from django.contrib.auth import get_user_model
-from rest_framework.generics import RetrieveAPIView, RetrieveUpdateDestroyAPIView
-from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, DestroyModelMixin
+from rest_framework.exceptions import NotAuthenticated
+from rest_framework.generics import RetrieveAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView
+from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, DestroyModelMixin, \
+    UpdateModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
 
-from Shop.api.authentication import CookieJWTAuthentication
-from Shop.api.permissions import RestrictApiPermission
+from Shop.api.authentication import FlexibleJWTAuthMixin
 from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
     CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer, \
     OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer, BookReviewsSerializer, \
@@ -28,21 +29,22 @@ User = get_user_model()
 
 
 # NO NEED OF RETRIEVE SINCE WE ONLY USE THE CURRENT CART
-class CartViewSet(ModelViewSet):
+class CartViewSet(CreateModelMixin,ListModelMixin,RetrieveModelMixin,GenericViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
+    permission_classes = [IsAuthenticated]
 
 #
-class CartItemsViewSet(ModelViewSet):
+class CartItemsViewSet(CreateModelMixin,ListModelMixin,DestroyModelMixin,GenericViewSet):
     list_serializer = CartItemListSerializer
     create_serializer = CartItemCreateSerializer
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
 
     serializer_class = CartItemCreateSerializer  # <- Make sure this is set
     queryset = CartItem.objects.all()
     lookup_field = "id"
-    parser_classes = [JSONParser, ]
+    parser_classes = [JSONParser,]
 
     def get_serializer_class(self):
         if self.action == 'list':
@@ -83,7 +85,6 @@ class BookReadOnlyViewSet(ReadOnlyModelViewSet):
 
     queryset = Book.objects.all()
     serializer_class = BookSerializer
-    authentication_classes = []
 
     def get_queryset(self):
         genre = self.request.query_params.get("genre",None)
@@ -127,12 +128,8 @@ class MyObtainTokenPairView(TokenObtainPairView):
         return response
 
 
-# WILL NEED FOR LATER
 
-class UserApiViewSet(ModelViewSet):
-    # authentication_classes = [CookieJWTAuthentication]
-    permission_classes = [RestrictApiPermission]
-
+class UserApiViewSet(CreateModelMixin,GenericViewSet):
 
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
@@ -140,7 +137,7 @@ class UserApiViewSet(ModelViewSet):
 
 class LogoutApiView(APIView):
 
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         response = Response()
@@ -153,9 +150,10 @@ class LogoutApiView(APIView):
 
         return response
 
-class OrderViewSet(ModelViewSet):
+class OrderViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
 
     queryset = Order.objects.all()
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
@@ -178,13 +176,8 @@ class OrderViewSet(ModelViewSet):
 
 
 # Not sure for that
-class OrderItemsViewSet(ModelViewSet):
 
-    serializer_class = OrderItemSerializer
-    queryset = OrderItems.objects.all()
-
-
-class CurrentUserViewSet(RetrieveUpdateDestroyAPIView):
+class CurrentUserViewSet(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
 
     queryset = User.objects.all()
@@ -204,8 +197,9 @@ class CurrentUserViewSet(RetrieveUpdateDestroyAPIView):
         return self.request.user
 
 
-class BookReviewsModelViewSet(ModelViewSet):
+class BookReviewsModelViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
 
+    permission_classes = [IsAuthenticated]
     serializer_class = BookReviewsSerializer
     queryset = BookReview.objects.all()
 

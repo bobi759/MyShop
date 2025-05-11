@@ -44,7 +44,7 @@ from rest_framework_nested import routers
 from Shop.api.views import (
     CartViewSet, BookReadOnlyViewSet, GenreReadOnlyViewSet,
     LogoutApiView, MyObtainTokenPairView, UserApiViewSet,
-    CartItemsViewSet, OrderViewSet, OrderItemsViewSet, CurrentUserViewSet, BookReviewsModelViewSet
+    CartItemsViewSet, OrderViewSet, CurrentUserViewSet, BookReviewsModelViewSet
 )
 from rest_framework_simplejwt.views import TokenRefreshView
 
@@ -79,7 +79,6 @@ book_router.register("reviews",BookReviewsModelViewSet,basename='book-reviews')
 router.register(r'order',OrderViewSet)
 
 
-router.register(r'order-items', OrderItemsViewSet)
 
 
 

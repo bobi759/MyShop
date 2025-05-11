@@ -187,7 +187,7 @@ class GetUserSerializer(serializers.ModelSerializer):
 
     def get_cart_id(self, obj):
         try:
-            return obj.cart.id  # Access the reverse relation of the OneToOneField
+            return obj.cart.id
         except Cart.DoesNotExist:
             return None
 
