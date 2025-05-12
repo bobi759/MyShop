@@ -1,8 +1,5 @@
-from django.contrib.auth.mixins import AccessMixin
-from django.db.models.expressions import result
 from django.http import HttpResponseRedirect
-from django.shortcuts import redirect
-from rest_framework.reverse import reverse_lazy, reverse
+from rest_framework.reverse import reverse_lazy
 from rest_framework.status import HTTP_302_FOUND
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
@@ -14,12 +11,10 @@ class CookieJWTAuthentication(JWTAuthentication):
         raw_token = request.COOKIES.get('token')
         if raw_token is None:
             return None
-
         try:
             validated_token = self.get_validated_token(raw_token)
             return self.get_user(validated_token), validated_token
         except Exception:
-            # Fail silently — treat as unauthenticated if token is invalid
             return None
 
 
@@ -40,30 +35,22 @@ class FlexibleJWTAuthMixin(JWTUserAuthMixin):
     allow_authenticated = True  # True = login required, False = only for unauthenticated users
     unauthorized_user_redirect = None
     unauthenticated_user_redirect = reverse_lazy("login profile")
-    def get_unauthorized_user_redirect(self):
-        """Redirect when user is authenticated but not allowed to access the view."""
-        return self.unauthorized_user_redirect  # default fallback, override in subclasses if needed
-
-    def get_unauthenticated_user_redirect(self):
-        """Redirect when user is not authenticated but required."""
-        return self.unauthenticated_user_redirect  # default fallback, override in subclasses
 
     def dispatch(self, request, *args, **kwargs):
         try:
             user = self.authenticate_and_assign_user(request)
             if user:
                 if not self.allow_authenticated:
-                    return HttpResponseRedirect(self.get_unauthorized_user_redirect(), status=HTTP_302_FOUND)
+                    return HttpResponseRedirect(self.unauthorized_user_redirect , status=HTTP_302_FOUND)
             else:
                 if self.allow_authenticated:
-                    redirect_url = self.get_unauthenticated_user_redirect()
+                    redirect_url = self.unauthenticated_user_redirect
                     if redirect_url:
                         return HttpResponseRedirect(redirect_url, status=HTTP_302_FOUND)
-                    # If no redirect is set, allow normal view processing
             return super().dispatch(request, *args, **kwargs)
 
         except Exception:
-            redirect_url = self.get_unauthenticated_user_redirect()
+            redirect_url = self.unauthenticated_user_redirect
             return HttpResponseRedirect(redirect_url) if redirect_url else super().dispatch(request, *args, **kwargs)
 
 

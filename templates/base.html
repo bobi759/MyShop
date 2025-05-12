@@ -5,13 +5,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Navbar</title>
+    <title>MyShop</title>
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css">
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+
 </head>
 <body class="{% block body-class %}default-bg{% endblock %}">
 
@@ -27,7 +29,7 @@
                 <li class="nav-item"><a class="nav-link" href="{% url 'home page' %}">Home</a></li>
 
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                    <a class="nav-link dropdown-toggle" id="navbarDropdown" role="button"
                        data-bs-toggle="dropdown" aria-expanded="false">Books</a>
                     <ul class="dropdown-menu text-start" aria-labelledby="navbarDropdown" id="genre-list">
                         <li><a class="dropdown-item" href="{% url 'products' %}">All books</a></li>
@@ -48,7 +50,7 @@
                 </li>
 
                 <li class="nav-item">
-                    <a class="nav-link" href="/product/order">
+                    <a class="nav-link" href="{% url 'order products' %}">
                         <i class="bi bi-bag"></i>
                     </a>
                 </li>
@@ -68,45 +70,25 @@
 
 
 <script>
-    
-    function renderAccountMenu(isAuthenticated, userId) {
-        const $menu = $('#account-menu');
-        $menu.empty();
-
-        if (isAuthenticated) {
-            $menu.append(`
-                <li><a class="dropdown-item" href="/account/details/${userId}">Profile Details</a></li>
-                <li><a class="dropdown-item" href="/account/edit/${userId}">Edit Profile</a></li>
-                <li><a class="dropdown-item" href="/account/logout/">Logout</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a class="dropdown-item text-danger" href="/profile/delete/${userId}">Delete Profile</a></li>
-            `);
-        } else {
-            $menu.append(`
-                <li><a class="dropdown-item" href="/account/login/">Login</a></li>
-                <li><a class="dropdown-item" href="/account/register/">Register</a></li>
-            `);
-        }
-    }
 
     $(document).ready(function () {
 
-            $.ajax({
-                url: "http://localhost:8000/api/current-user/",
-                method: "GET",
-                xhrFields: {
-                    withCredentials: true
-                },
-                success: function (data) {
-                    const username = data["email"];
-                    $('#username-display').text(username).css('visibility', 'visible');
-                    renderAccountMenu(true, data.id);
-                },
-                error: function () {
-                    $('#username-display').text("Account").css('visibility', 'visible');
-                    renderAccountMenu(false);
-                }
-            });
+        $.ajax({
+            url: "http://localhost:8000/api/current-user/",
+            method: "GET",
+            xhrFields: {
+                withCredentials: true
+            },
+            success: function (data) {
+                const username = data["email"];
+                $('#username-display').text(username).css('visibility', 'visible');
+                renderAccountMenu(true, data.id);
+            },
+            error: function () {
+                $('#username-display').text("Account").css('visibility', 'visible');
+                renderAccountMenu(false);
+            }
+        });
 
         $.ajax({
             type: 'GET',
@@ -122,12 +104,46 @@
         });
 
         function AddGenreToNavbar(genreName) {
+
+
             let listItem = $('<li class="nav-item">');
-            let link = $('<a class="dropdown-item" href="/products/?genre=' + genreName + '">').text(genreName);
+            const baseProductsUrl = "{% url 'products' %}";
+            let link = $('<a class="dropdown-item">')
+                .attr('href', `${baseProductsUrl}?genre=${encodeURIComponent(genreName)}`)
+                .text(genreName);
             listItem.append(link);
             $('#genre-list').append(listItem);
         }
     });
+
+    function renderAccountMenu(isAuthenticated, userId) {
+
+        const urlPatterns = {
+            profileDetails: "{% url 'profile details' 0 %}".replace("0/", ""),
+            profileEdit: "{% url 'edit profile' 0 %}".replace("0/", ""),
+            logout: "{% url 'logout profile' %}",
+            accountLogin: "{% url 'login profile' %}",
+            accountRegister: "{% url 'create profile' %}"
+        };
+
+        const $menu = $('#account-menu');
+        $menu.empty();
+
+        if (isAuthenticated) {
+            $menu.append(`
+                <li><a class="dropdown-item" href="${urlPatterns.profileDetails}${userId}">Profile Details</a></li>
+                <li><a class="dropdown-item" href="${urlPatterns.profileEdit}${userId}">Edit Profile</a></li>
+                <li><a class="dropdown-item" href="${urlPatterns.logout}">Logout</a></li>
+            `);
+        } else {
+            $menu.append(`
+                <li><a class="dropdown-item" href="${urlPatterns.accountLogin}">Login</a></li>
+                <li><a class="dropdown-item" href="${urlPatterns.accountRegister}">Register</a></li>
+            `);
+        }
+    }
+
+
 </script>
 
 </body>
@@ -135,13 +151,8 @@
 {% block footer %}
     <div class="container footer-container">
         <footer class="py-3 my-4">
-            <ul class="nav justify-content-center border-bottom pb-3 mb-3">
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Home</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">Contact</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">FAQs</a></li>
-                <li class="nav-item"><a href="#" class="nav-link px-2 text-body-secondary">About</a></li>
-            </ul>
-            <p class="text-center text-body-secondary">© 2024 Company, Inc</p>
+            <ul class="nav justify-content-center border-bottom pb-3 mb-3"></ul>
+            <p class="text-center text-body-secondary">© 2025 MyShop, Inc</p>
         </footer>
     </div>
 {% endblock %}

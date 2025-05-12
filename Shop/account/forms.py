@@ -46,7 +46,6 @@ class EditProfileForm(forms.ModelForm):
         widget=forms.EmailInput(attrs={'placeholder': 'Enter your email'})
     )
 
-
     class Meta:
         model = Profile
         exclude = ("user",)

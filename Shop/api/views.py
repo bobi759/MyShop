@@ -1,25 +1,20 @@
 from django.contrib.auth import get_user_model
-from rest_framework.exceptions import NotAuthenticated
-from rest_framework.generics import RetrieveAPIView, RetrieveUpdateDestroyAPIView, RetrieveUpdateAPIView
-from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, DestroyModelMixin, \
-    UpdateModelMixin
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.mixins import RetrieveModelMixin, CreateModelMixin, ListModelMixin, DestroyModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.views import APIView
-from rest_framework_simplejwt.authentication import JWTAuthentication
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
 from rest_framework_simplejwt.views import TokenObtainPairView
-
-from Shop.api.authentication import FlexibleJWTAuthMixin
-from Shop.api.serializers import BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer, \
-    CartItemUpdateSerializer, CartRetrieveSerializer, CreateUserSerializer, EditUserSerializer, GetUserSerializer, \
-    OrderSerializer, OrderItemSerializer, CreateOrderSerializer, TestUserSerializer, BookReviewsSerializer, \
-    BookReviewPostSerializer
+from Shop.api.serializers import (BookSerializer, GenreSerializer, CartSerializer, CartItemCreateSerializer,
+                                  CreateUserSerializer, EditUserSerializer, GetUserSerializer, \
+                                  ListOrderSerializer, CreateOrderSerializer, ListBookReviewSerializer, \
+                                  BookReviewPostSerializer)
 
 from rest_framework.response import Response
-from rest_framework.viewsets import ModelViewSet, ReadOnlyModelViewSet, GenericViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, GenericViewSet
 
 from Shop.api.serializers import CartItemListSerializer
-from Shop.shop_app.models import Book, CartItem, Genre, Cart, Order, OrderItems, BookReview
+from Shop.shop_app.models import Book, CartItem, Genre, Cart, Order, BookReview
 from rest_framework.parsers import JSONParser
 
 import datetime
@@ -28,36 +23,30 @@ from rest_framework import status
 User = get_user_model()
 
 
-# NO NEED OF RETRIEVE SINCE WE ONLY USE THE CURRENT CART
-class CartViewSet(CreateModelMixin,ListModelMixin,RetrieveModelMixin,GenericViewSet):
+class CartViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericViewSet):
     queryset = Cart.objects.all()
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
 
+
 #
-class CartItemsViewSet(CreateModelMixin,ListModelMixin,DestroyModelMixin,GenericViewSet):
+class CartItemsViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
+    serializer_class = CartItemCreateSerializer
     list_serializer = CartItemListSerializer
     create_serializer = CartItemCreateSerializer
+
     permission_classes = [IsAuthenticated]
-
-
-    serializer_class = CartItemCreateSerializer  # <- Make sure this is set
     queryset = CartItem.objects.all()
     lookup_field = "id"
     parser_classes = [JSONParser,]
 
     def get_serializer_class(self):
-        if self.action == 'list':
-            return self.list_serializer
-        if self.request.method == 'POST':
+        if self.action == "create":
             return self.create_serializer
-        return self.list_serializer  # fallback serializer for GET (retrieve), PUT, PATCH, DELETE
+        return self.list_serializer
 
     def get_queryset(self):
-        old_queryset = super().get_queryset()
-        new_queryset = old_queryset.filter(cart_id = self.kwargs["cart_pk"])
-        return new_queryset
-
+        return super().get_queryset().filter(cart_id=self.kwargs["cart_pk"])
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
@@ -72,7 +61,6 @@ class CartItemsViewSet(CreateModelMixin,ListModelMixin,DestroyModelMixin,Generic
         cart_id = instance.cart_id
         self.perform_destroy(instance)
 
-        # Get updated cart total
         try:
             cart = Cart.objects.get(id=cart_id)
             total = cart.total_price
@@ -81,13 +69,13 @@ class CartItemsViewSet(CreateModelMixin,ListModelMixin,DestroyModelMixin,Generic
 
         return Response({'new_total_price': total}, status=status.HTTP_200_OK)
 
-class BookReadOnlyViewSet(ReadOnlyModelViewSet):
 
+class BookReadOnlyViewSet(ReadOnlyModelViewSet):
     queryset = Book.objects.all()
     serializer_class = BookSerializer
 
     def get_queryset(self):
-        genre = self.request.query_params.get("genre",None)
+        genre = self.request.query_params.get("genre", None)
         new_query = Book.objects.filter(genre__name=genre)
         if new_query:
             return new_query
@@ -128,15 +116,12 @@ class MyObtainTokenPairView(TokenObtainPairView):
         return response
 
 
-
-class UserApiViewSet(CreateModelMixin,GenericViewSet):
-
+class UserApiViewSet(CreateModelMixin, GenericViewSet):
     serializer_class = CreateUserSerializer
     queryset = User.objects.all()
 
 
 class LogoutApiView(APIView):
-
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
@@ -150,32 +135,33 @@ class LogoutApiView(APIView):
 
         return response
 
-class OrderViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
+
+class OrderViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+
+    createOrderSerializer = CreateOrderSerializer
+    listOrderSerializer = ListOrderSerializer
 
     queryset = Order.objects.all()
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         user = self.request.user
-        old_query = super().get_queryset()
         if user.is_staff:
             return Order.objects.all()
         else:
-            new_query = old_query.filter(owner=user)
-            return new_query
+            return super().get_queryset().filter(owner=user)
+
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            return CreateOrderSerializer
-        return OrderSerializer
+            return self.createOrderSerializer
+        return self.listOrderSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
         context["user"] = self.request.user
         return context
 
-
-# Not sure for that
 
 class CurrentUserViewSet(RetrieveUpdateAPIView):
     permission_classes = [IsAuthenticated]
@@ -197,25 +183,21 @@ class CurrentUserViewSet(RetrieveUpdateAPIView):
         return self.request.user
 
 
-class BookReviewsModelViewSet(CreateModelMixin,ListModelMixin,GenericViewSet):
+class BookReviewsModelViewSet(CreateModelMixin, ListModelMixin, GenericViewSet):
+
+    bookReviewPostSerializer = BookReviewPostSerializer
+    bookReviewListSerializer = ListBookReviewSerializer
 
     permission_classes = [IsAuthenticated]
-    serializer_class = BookReviewsSerializer
     queryset = BookReview.objects.all()
 
     def get_queryset(self):
-        book_id = self.kwargs.get('book_pk',None)
-        old_queryset = super().get_queryset()
-        new_queryset = old_queryset.filter(book__id=book_id)
+        book_id = self.kwargs.get('book_pk', None)
+        new_queryset = super().get_queryset().filter(book__id=book_id)
         return new_queryset[:3]
+        # may return 3 random reviews as well for diversity
 
     def get_serializer_class(self):
         if self.request.method == "POST":
-            return BookReviewPostSerializer
-        return BookReviewsSerializer
-
-
-
-
-
-
+            return self.bookReviewPostSerializer
+        return self.bookReviewListSerializer

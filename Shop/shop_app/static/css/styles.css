@@ -78,6 +78,14 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
+.card-img-top {
+            width: 50%; /* Ensures the image takes full card width */
+            height: 250px; /* Consistent height */
+            object-fit: cover; /* Prevents distortion */
+            display: block; /* Removes extra spacing */
+            margin: 0 auto; /* Centers image */
+        }
+
 #carouselExampleControls{
 background: radial-gradient(circle at center, #ffffff, #fdfcfa, #faf7f3);
     padding: 60px 20px;

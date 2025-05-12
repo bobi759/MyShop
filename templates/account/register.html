@@ -84,7 +84,6 @@
                 formData.append("profile.profile_picture", fileInput.files[0]);
             }
 
-            // First AJAX: register the user
             $.ajax({
                 url: "http://localhost:8000/api/user/",
                 type: 'POST',
@@ -93,8 +92,6 @@
                 processData: false,
                 success: function (res) {
                     console.log("User registered:", res);
-
-                    // Now login after successful registration
                     $.ajax({
                         url: 'http://localhost:8000/api/login/',
                         type: 'POST',
