@@ -19,40 +19,9 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
-    
-    function getCookie(name) {
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let cookie of cookies) {
-                cookie = cookie.trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
-    }
-    
-        function logOut() {
-            $.ajax({
-                url: `http://localhost:8000/api/logout/`,
-                type: 'POST',
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken'),
-                },
-                success: function () {
-                    window.location.href = "http://localhost:8000/"
-                },
-                error: function (xhr, status, error) {
-                    console.log(xhr.status);
-                    console.log(error);
-                }
-            });
-        }
-
-
+        const csrfToken = "{{ csrf_token }}";
     </script>
+
+    <script src="{% static 'script/account/logout-script.js' %}"></script>
 
 {% endblock %}

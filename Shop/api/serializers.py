@@ -183,6 +183,17 @@ class OrderItemSerializer(ModelSerializer):
 class CreateOrderSerializer(serializers.Serializer):
     cart_id = serializers.UUIDField()
 
+    def validate_cart_id(self, value):
+        try:
+            cart = Cart.objects.prefetch_related('items').get(id=value)
+        except Cart.DoesNotExist:
+            raise serializers.ValidationError("Cart not found.")
+
+        if not cart.items.exists():
+            raise serializers.ValidationError("Cart is empty.")
+
+        return value
+
     def save(self, **kwargs):
         cart_id = self.validated_data["cart_id"]
         user = self.context["user"]

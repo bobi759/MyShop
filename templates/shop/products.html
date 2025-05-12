@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load static %}
+
 
 {% block content %}
 
@@ -6,56 +8,17 @@
     <div class="container my-5">
         <h2 class="fw-bold pb-5">All Products</h2>
         <div class="row">
-
+            <!-- Book cards go here -->
         </div>
     </div>
 
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
+    
     <script>
-
-        let url_string = window.location.href
-        let url = new URL(url_string);
-        let genre = url.searchParams.get("genre");
-
-        $.ajax({
-            type: "GET",
-            url: "http://localhost:8000/api/book/",
-            data: {
-                "genre": genre,
-            },
-            success: (data) => {
-                console.log(data)
-                data.forEach(book => {
-                    renderBookCards(book)
-                })
-            },
-            error: (error) => {
-                console.log(error)
-            }
-        });
-
-        function renderBookCards(book) {
-
-            const productDetailBaseUrl = "{% url 'product detail' 0 %}".replace("0/", "");
-            let detailUrl = `${productDetailBaseUrl}${book.id}`;
-
-
-            let emptyCard = `
-                    <div class="col-md-3 col-sm-6">
-                    <div class="card border-0" >
-                        <a href="${detailUrl}"><img src="${book.image}" class="card-img-top" alt="HTML tutorial"></a>
-                        <div class="card-body text-center">
-                            <h5 class="card-title">${book.title}</h5>
-                            <p>${book.author}</p>
-                            <p class="fw-bold">$${book.price}</p>
-                        </div>
-                    </div>
-                </div>
-                `;
-            $(".row").append(emptyCard);
-        }
-
+            const PRODUCT_DETAIL_BASE_URL = "{% url 'product detail' 0 %}".replace("0/", "");
     </script>
+    <script src="{% static 'script/products/products-script.js' %}"></script>
+
+
 {% endblock %}
 
