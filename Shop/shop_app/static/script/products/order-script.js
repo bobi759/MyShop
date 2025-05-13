@@ -26,7 +26,7 @@ function getAllBookNames() {
         success: (cart) => {
             const books = cart["items"];
             const cartItemsContainer = $("#cart-items");
-            cartItemsContainer.empty(); // Clear previous content
+            cartItemsContainer.empty();
 
             if (books.length === 0) {
                 $("#cart-empty-message").show();
@@ -123,16 +123,15 @@ function confirmOrder() {
     const hasItems = $("#cart-items").children().length > 0;
 
     if (!hasItems) {
+        $(".modal-backdrop").remove();
+        $("body").removeClass("modal-open").css("padding-right", "");
+
         const modalEl = document.getElementById('exampleModal');
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        const modalInstance = bootstrap.Modal.getInstance(modalEl) || bootstrap.Modal.getOrCreateInstance(modalEl);
         modalInstance.hide();
 
-        modalEl.addEventListener('hidden.bs.modal', function cleanup() {
-            $('body').removeClass('modal-open').css('padding-right', '');
-            $('.modal-backdrop').remove();
-            showErrorToast("🛒 Your cart is empty. Please add some books first.");
-            modalEl.removeEventListener('hidden.bs.modal', cleanup);
-        });
+        // Show error message
+        showErrorToast("🛒 Your cart is empty. Please add some books first.");
 
         return;
     }
@@ -141,7 +140,7 @@ function confirmOrder() {
         method: "POST",
         url: `http://localhost:8000/api/order/`,
         contentType: "application/json",
-        data: JSON.stringify({"cart_id": cart_id}),
+        data: JSON.stringify({ "cart_id": cart_id }),
         success: () => {
             showToastAfterRedirect("✅ Your order was placed successfully!");
             window.location.href = homeUrl;
@@ -149,23 +148,11 @@ function confirmOrder() {
         error: (xhr) => {
             try {
                 const message = xhr.responseJSON?.detail || "An unexpected error occurred.";
-                showErrorPopup(message);
+                showErrorToast(message);
             } catch (e) {
-                showErrorPopup("An unexpected error occurred.");
+                showErrorToast("An unexpected error occurred.");
             }
         }
     });
 }
 
-function showErrorPopup(message) {
-    const confirmModal = bootstrap.Modal.getInstance(document.getElementById('exampleModal'));
-    if (confirmModal) confirmModal.hide();
-    $(".modal-backdrop").remove();
-    $("body").removeClass("modal-open").css("padding-right", "");
-
-    setTimeout(() => {
-        $("#error-modal-body").text(message);
-        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-        errorModal.show();
-    }, 200);
-}
