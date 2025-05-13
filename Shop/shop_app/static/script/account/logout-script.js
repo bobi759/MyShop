@@ -6,7 +6,9 @@ function logOut() {
             'X-CSRFToken': csrfToken
         },
         success: function () {
-            window.location.href = "http://localhost:8000/"
+            window.location.href = homeUrl
+            localStorage.setItem("toastMessage", "✅ Account logged out successfully!");
+
         },
         error: function (xhr, status, error) {
             console.log(xhr.status);

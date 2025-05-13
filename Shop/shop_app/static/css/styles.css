@@ -13,10 +13,38 @@ body {
 }
 
 
-
-.default-bg {
-    background-color: white; /* Default background */
+.cta-button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
+
+.cta-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+
+.book-card:hover {
+  transform: translatey(-8px);
+}
+
+.book-card img {
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  max-height: 300px;
+  object-fit: contain;
+}
+
+.book-card .card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.book-card img {
+  transition: transform 0.5s ease;
+}
+
+
 
 /* Special background only for specific pages */
 .radial-gradient-bg {

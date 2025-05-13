@@ -33,23 +33,25 @@ function loadReviews() {
 
             if (reviews.length === 0) {
                 container.append(`
-                        <div class="carousel-item active">
-                            <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
-                                <div>
-                                    <p class="text-muted fs-4 fw-semibold text-center mb-0">
-                                        No reviews yet. Be the first to share your thoughts!
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    `);
-
-                // Hide carousel controls when there are no reviews
+        <div class="carousel-item active">
+            <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+                <div>
+                    <p class="text-muted fs-4 fw-semibold text-center mb-0">
+                        No reviews yet. Be the first to share your thoughts!
+                    </p>
+                </div>
+            </div>
+        </div>
+    `);
                 $('.carousel-control-prev, .carousel-control-next').hide();
                 return;
             }
 
-            $('.carousel-control-prev, .carousel-control-next').show();
+            if (reviews.length === 1) {
+                $('.carousel-control-prev, .carousel-control-next').hide();
+            } else {
+                $('.carousel-control-prev, .carousel-control-next').show();
+            }
 
             reviews.forEach((review, index) => {
                 const isActive = index === 0 ? 'active' : '';
@@ -104,9 +106,9 @@ function loadBookDetails(book) {
         <div class="col-md-7">
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="${urlPatterns.home}">Home</a></li>
-                    <li class="breadcrumb-item"><a href="${urlPatterns.allBooks}">All books</a></li>
-                    <li class="breadcrumb-item"><a href="${urlPatterns.genreBase}${encodeURIComponent(book.genre.name)}">${book.genre.name}</a></li>
+                    <li class="breadcrumb-item"><a href="${bookDetailsPatters.home}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="${bookDetailsPatters.allBooks}">All books</a></li>
+                    <li class="breadcrumb-item"><a href="${bookDetailsPatters.genreBase}${encodeURIComponent(book.genre.name)}">${book.genre.name}</a></li>
                     <li class="breadcrumb-item active" aria-current="page">${book.title}</li>
                 </ol>
             </nav>
@@ -142,7 +144,8 @@ $(document).on('submit', '#add-to-cart-form', function (e) {
         }),
         success: function () {
             console.log(`Posted on ${cart_id}`);
-            window.location.href = urlPatterns.allBooks;
+            localStorage.setItem("toastMessage", "✅ Your product was added to cart successfully!");
+            window.location.href = bookDetailsPatters.allBooks;
         },
         error: function (xhr) {
             console.error("Error:", xhr.responseText);
@@ -155,19 +158,24 @@ function postReview() {
     const description = document.getElementById("review-description").value.trim();
 
     if (!title || !description) {
+        // Close the review modal safely
         const reviewModalEl = document.getElementById('reviewModal');
         const reviewModalInstance = bootstrap.Modal.getInstance(reviewModalEl);
         if (reviewModalInstance) {
             reviewModalInstance.hide();
         }
 
-        reviewModalEl.addEventListener('hidden.bs.modal', function () {
-            document.body.classList.remove('modal-open');
-            document.querySelectorAll('.modal-backdrop').forEach(el => el.remove());
+        // Fully clean up modal state after hidden
+        reviewModalEl.addEventListener('hidden.bs.modal', function cleanup() {
+            $('body').removeClass('modal-open').css('padding-right', '');
+            $('.modal-backdrop').remove();
+            $('#reviewModal').removeClass('show'); // in case it's stuck
 
-            const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-            errorModal.show();
-        }, {once: true});
+            showErrorToast("⚠️ Please fill in both the title and description of your review.");
+
+            // Remove this event listener after it runs once
+            reviewModalEl.removeEventListener('hidden.bs.modal', cleanup);
+        });
 
         return;
     }
@@ -195,9 +203,10 @@ function postReview() {
 
             loadReviews();
             document.getElementById("review-form").reset();
+            showToastNow("✅ Book review was posted successfully!")
+
         },
         error: function (xhr) {
         }
     });
 }
-

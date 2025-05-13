@@ -83,12 +83,11 @@ function editUser(event) {
         processData: false,
         contentType: false,
         success: function (data) {
-            alert("Profile was updated successfully");
-            let details_url = details_url_template.replace(/1$/, user_id);
-            window.location.href = details_url;
+            window.location.href = details_url_template.replace(/1$/, user_id);
+            showToastAfterRedirect("✅ Account edited successfully!");
         },
         error: function (xhr) {
-            console.error("Update failed:", xhr.status, xhr.responseText);
+            showErrorToast(xhr.responseText);
         }
     });
 }

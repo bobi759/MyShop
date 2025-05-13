@@ -40,9 +40,12 @@ function registerUser(event) {
                 success: function (data) {
                     console.log("User logged in:", data);
                     window.location.href = 'http://localhost:8000/';
+                    localStorage.setItem("toastMessage", "✅ Account registered successfully!");
+
                 },
                 error: function (xhr, status, error) {
-                    console.error("Login failed:", error);
+                    showErrorToast(error);
+
                 }
             });
         },
@@ -54,16 +57,16 @@ function registerUser(event) {
                 for (const key in errors) {
                     if (typeof errors[key] === 'object' && errors[key] !== null) {
                         for (const subKey in errors[key]) {
-                            errorMessage += `${key}.${subKey}: ${errors[key][subKey]}\n`;
+                            errorMessage += `${subKey}: ${errors[key][subKey]}\n`;
                         }
                     } else {
                         errorMessage += `${key}: ${errors[key]}\n`;
                     }
                 }
 
-                alert(errorMessage);
+                showErrorToast(errorMessage);
             } else {
-                alert("An unknown error occurred.");
+                showErrorToast("An unknown error occurred.");
             }
         }
     });

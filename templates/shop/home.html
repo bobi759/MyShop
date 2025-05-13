@@ -11,23 +11,25 @@
         <div class="row align-items-center g-5 py-5">
             <div class="col-lg-6 text-center text-lg-start">
                 <div class="content-wrapper mx-auto">
-                    <h1 class="display-5 fw-bold lh-1 mb-4">One Bookshop, Endless Adventures!</h1>
+                    <h1 class="display-5 fw-bold lh-1 mb-4"> One Bookshop, Endless Adventures!</h1>
                     <p class="lead mb-4">Knowledge isn’t built in a day. It grows with every book you read. Build your
                         future, one book at a time. Start your collection now!</p>
                     <a href="{% url 'products' %}"
-                       class="btn btn-lg px-4 fw-semibold text-white rounded-pill shadow-lg bg-danger">
+                       class="btn btn-lg px-4 fw-semibold text-white rounded-pill shadow-lg bg-danger cta-button">
                         Explore Now →
                     </a>
 
                 </div>
             </div>
             <div class="col-lg-6 text-center">
-                <img src="{% static 'img/book-enter.png' %}" class="d-block mx-auto img-fluid" alt="Books" width="400"
+                <img src="{% static 'img/book-enter.png' %}" class="d-block mx-auto img-fluid hero-image" alt="Books" width="400"
                      height="400" loading="lazy">
             </div>
         </div>
     </div>
 {% endblock %}
 
-{% block footer %}{% endblock %}
+{% block footer %}
+    
+{% endblock %}
 

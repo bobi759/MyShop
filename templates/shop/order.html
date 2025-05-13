@@ -8,46 +8,48 @@
           integrity="sha256-NAxhqDvtY0l4xn+YVa6WjAcmd94NNfttjNsDmNatFVc=" crossorigin="anonymous"/>
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
     <link rel="stylesheet" href="{% static 'css/order.css' %}">
-        
-<div class="order-wrapper">
-    <div class="container">
-        <div class="row">
-            <div class="col-xl-8">
-                <div id="cart-empty-message" class="text-center text-muted my-5" style="display: none; padding-bottom: 60px;">
-                    <h4>No books yet</h4>
-                    <p>Your cart is empty. Add some books to see them here!</p>
-                </div>
 
-                <div id="cart-items">
-                <!-- Book cards go here -->
-                </div>
-
-                <div class="row my-4">
-                    <div class="col-sm-6">
-                        <a href="{% url 'products' %}" class="btn btn-link text-muted">
-                            <i class="mdi mdi-arrow-left me-1"></i> Continue Shopping
-                        </a>
+    <div class="order-wrapper">
+        <div class="container">
+            <div class="row">
+                <div class="col-xl-8">
+                    <div id="cart-empty-message" class="text-center text-muted my-5"
+                         style="display: none; padding-bottom: 60px;">
+                        <h4>No books yet</h4>
+                        <p>Your cart is empty. Add some books to see them here!</p>
                     </div>
-                    <div class="col-sm-6">
-                        <div class="text-sm-end mt-2 mt-sm-0">
-                            <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal" title="Proceed to Checkout">
-                                <i class="mdi mdi-cart-outline me-2"></i> Proceed to Checkout
+
+                    <div id="cart-items">
+                        <!-- Book cards go here -->
+                    </div>
+
+                    <div class="row my-4">
+                        <div class="col-sm-6">
+                            <a href="{% url 'products' %}" class="btn btn-link text-muted">
+                                <i class="mdi mdi-arrow-left me-1"></i> Continue Shopping
                             </a>
                         </div>
+                        <div class="col-sm-6">
+                            <div class="text-sm-end mt-2 mt-sm-0">
+                                <a class="btn btn-link" data-bs-toggle="modal" data-bs-target="#exampleModal"
+                                   title="Proceed to Checkout">
+                                    <i class="mdi mdi-cart-outline me-2"></i> Proceed to Checkout
+                                </a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="col-xl-4">
-                <div class="mt-5 mt-lg-0">
-                    <div class="card border shadow-none">
-                        <div class="card-header bg-transparent border-bottom py-3 px-4">
-                            <h5 class="font-size-16 mb-0">Order Summary</h5>
-                        </div>
-                        <div class="card-body p-4 pt-2">
-                            <div class="table-responsive">
-                                <table class="table mb-0">
-                                    <tbody>
+                <div class="col-xl-4">
+                    <div class="mt-5 mt-lg-0">
+                        <div class="card border shadow-none">
+                            <div class="card-header bg-transparent border-bottom py-3 px-4">
+                                <h5 class="font-size-16 mb-0">Order Summary</h5>
+                            </div>
+                            <div class="card-body p-4 pt-2">
+                                <div class="table-responsive">
+                                    <table class="table mb-0">
+                                        <tbody>
                                         <tr>
                                             <td>Sub Total :</td>
                                             <td class="text-end order-summary-subtotal">$0.00</td>
@@ -62,59 +64,47 @@
                                                 <span class="fw-bold order-summary-total">$0.00</span>
                                             </td>
                                         </tr>
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
 
-<!-- Confirmation Modal -->
-<div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
-      </div>
-      <div class="modal-body">
-        Almost there! Want to confirm this order?
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" onclick="confirmOrder()" >Complete Purchase</button>
-      </div>
+            <!-- Confirmation Modal -->
+            <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel"
+                 aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">Confirmation</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            Almost there! Want to confirm this order?
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-primary" onclick="confirmOrder()">Complete Purchase
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
     </div>
-  </div>
-</div>
 
-<!-- Error Modal -->
-<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header bg-danger text-white">
-        <h5 class="modal-title" id="errorModalLabel">Error</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button> 
-      </div>
-      <div class="modal-body" id="error-modal-body"></div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">OK</button>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-</div>
-
-<!-- Scripts -->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>
+    <!-- Scripts -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+            crossorigin="anonymous"></script>
 
     <script>
-            const homeUrl = "{% url 'home page' %}";
+        const homeUrl = "{% url 'home page' %}";
+        
     </script>
     <script src="{% static 'script/products/order-script.js' %}"></script>
 

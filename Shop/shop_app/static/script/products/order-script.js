@@ -111,20 +111,39 @@ function deleteItem(item_id) {
             if ($("#cart-items").children().length === 0) {
                 $("#cart-empty-message").show();
             }
+            showToastNow("✅ Product was deleted successfully!");
         },
         error: (error) => {
-            console.log(error);
+            showErrorToast(error);
         }
     });
 }
 
 function confirmOrder() {
+    const hasItems = $("#cart-items").children().length > 0;
+
+    if (!hasItems) {
+        const modalEl = document.getElementById('exampleModal');
+        const modalInstance = bootstrap.Modal.getOrCreateInstance(modalEl);
+        modalInstance.hide();
+
+        modalEl.addEventListener('hidden.bs.modal', function cleanup() {
+            $('body').removeClass('modal-open').css('padding-right', '');
+            $('.modal-backdrop').remove();
+            showErrorToast("🛒 Your cart is empty. Please add some books first.");
+            modalEl.removeEventListener('hidden.bs.modal', cleanup);
+        });
+
+        return;
+    }
+
     $.ajax({
         method: "POST",
         url: `http://localhost:8000/api/order/`,
         contentType: "application/json",
         data: JSON.stringify({"cart_id": cart_id}),
         success: () => {
+            showToastAfterRedirect("✅ Your order was placed successfully!");
             window.location.href = homeUrl;
         },
         error: (xhr) => {

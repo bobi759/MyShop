@@ -14,11 +14,11 @@ function loginFunc(event) {
                 },
                 success: function (data) {
                     console.log(data);
+                    showToastAfterRedirect("✅ Account was logged in successfully!")
                     window.location.href = 'http://localhost:8000/';
                 },
                 error: function (xhr, status, error) {
-                    console.log(xhr.status);
-                    console.log(error);
+                    showErrorToast("❌ Wrong credentials. Try again!")
                 }
             });
         }

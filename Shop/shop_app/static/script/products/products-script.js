@@ -1,3 +1,5 @@
+
+
 $(document).ready(() => {
     const url = new URL(window.location.href);
     const genre = url.searchParams.get("genre");
@@ -24,8 +26,8 @@ $(document).ready(() => {
         const detailUrl = `${PRODUCT_DETAIL_BASE_URL}${book.id}`;
 
         const emptyCard = `
-            <div class="col-md-3 col-sm-6">
-                <div class="card border-0">
+            <div class="col-md-3 col-sm-6 " data-aos="zoom-in-up">
+                <div class="card border-0 book-card" >
                     <a href="${detailUrl}">
                         <img src="${book.image}" class="card-img-top" alt="${book.title}">
                     </a>

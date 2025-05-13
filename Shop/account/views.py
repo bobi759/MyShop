@@ -4,11 +4,11 @@ from django.urls import reverse_lazy
 from django.views.generic import TemplateView
 
 from Shop.account.forms import CreateProfileForm
-from Shop.api.authentication import FlexibleJWTAuthMixin, EnsureOwnProfileMixin
+from Shop.api.authentication import CustomJWTAuthMixin, EnsureOwnProfileMixin
 
 User = get_user_model()
 
-class CreateProfile(FlexibleJWTAuthMixin, TemplateView):
+class CreateProfile(CustomJWTAuthMixin, TemplateView):
     allow_authenticated = False
     unauthorized_user_redirect = reverse_lazy("home page")
     unauthenticated_user_redirect = None
@@ -17,7 +17,7 @@ class CreateProfile(FlexibleJWTAuthMixin, TemplateView):
     extra_context = {"form": CreateProfileForm}
 
 
-class LoginUser(FlexibleJWTAuthMixin, TemplateView):
+class LoginUser(CustomJWTAuthMixin, TemplateView):
     allow_authenticated = False
     unauthorized_user_redirect = reverse_lazy("home page")
     unauthenticated_user_redirect = None
@@ -26,7 +26,7 @@ class LoginUser(FlexibleJWTAuthMixin, TemplateView):
     extra_context = {"form": AuthenticationForm}
 
 
-class LogoutUser(FlexibleJWTAuthMixin,TemplateView):
+class LogoutUser(CustomJWTAuthMixin, TemplateView):
     unauthenticated_user_redirect = reverse_lazy("home page")
 
     template_name = 'account/profile-logout.html'

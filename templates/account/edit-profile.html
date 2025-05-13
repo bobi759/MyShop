@@ -7,9 +7,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
     <script>
-        const csrfToken = "{{ csrf_token }}";
-
-        let details_url_template = "{% url 'edit profile' 1 %}";  // put at global scope
+        let details_url_template = "{% url 'edit profile' 1 %}";
     </script>
     <script src="{% static 'script/account/edit-script.js' %}"></script>
 

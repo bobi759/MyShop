@@ -31,7 +31,7 @@ class JWTUserAuthMixin:
         return user
 
 
-class FlexibleJWTAuthMixin(JWTUserAuthMixin):
+class CustomJWTAuthMixin(JWTUserAuthMixin):
     allow_authenticated = True  # True = login required, False = only for unauthenticated users
     unauthorized_user_redirect = None
     unauthenticated_user_redirect = reverse_lazy("login profile")

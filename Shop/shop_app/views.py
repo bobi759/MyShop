@@ -1,5 +1,5 @@
 from django.views.generic import TemplateView
-from Shop.api.authentication import FlexibleJWTAuthMixin
+from Shop.api.authentication import CustomJWTAuthMixin
 
 
 class AboutView(TemplateView):
@@ -12,7 +12,7 @@ class Products(TemplateView):
 
 
 
-class BookDetailView(FlexibleJWTAuthMixin, TemplateView):
+class BookDetailView(CustomJWTAuthMixin, TemplateView):
     template_name = 'shop/book-details.html'
 
     def get_context_data(self, **kwargs):
@@ -22,6 +22,6 @@ class BookDetailView(FlexibleJWTAuthMixin, TemplateView):
 
 
 # ORDER VIEW
-class OrderView(FlexibleJWTAuthMixin, TemplateView):
+class OrderView(CustomJWTAuthMixin, TemplateView):
     allow_authenticated = True
     template_name = "shop/order.html"
