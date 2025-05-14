@@ -11,7 +11,7 @@ $(document).ready(function loadElement() {
                 <div class="container mt-5 d-flex justify-content-center">
                     <div class="card shadow-sm w-100" style="max-width: 500px;">
                         <div class="card-body">
-                            <h3 class="card-title mb-4 text-center">Edit Profile</h3>
+                            <h3 class="mb-4 text-center">Edit Profile</h3>
                             <form id="edit-profile-form" enctype="multipart/form-data">
                                 <div class="mb-3">
                                     <label for="email" class="form-label">Email</label>

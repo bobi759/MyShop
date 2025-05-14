@@ -28,8 +28,14 @@ class CartViewSet(CreateModelMixin, ListModelMixin, RetrieveModelMixin, GenericV
     serializer_class = CartSerializer
     permission_classes = [IsAuthenticated]
 
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        if not user.is_staff:
+            return queryset.filter(id=user.cart.id)
+        return queryset
 
-#
+
 class CartItemsViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
     serializer_class = CartItemCreateSerializer
     list_serializer = CartItemListSerializer
@@ -103,7 +109,6 @@ class MyObtainTokenPairView(TokenObtainPairView):
 
         expires = datetime.datetime.utcnow() + datetime.timedelta(days=1)
 
-        # HTTP SHOULD BE TRUE ???
         response.set_cookie(
             'token', access,
             httponly=True, secure=True, samesite='Lax', expires=expires

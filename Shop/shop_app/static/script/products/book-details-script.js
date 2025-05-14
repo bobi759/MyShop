@@ -120,7 +120,7 @@ function loadBookDetails(book) {
                 <input type="number" id="quantity" class="form-control w-25" name="quantity" value="1" min="1">
                 <button type="submit" class="btn btn-warning mt-3 px-4 py-2">Add To Cart</button>
             </form>
-            <h4 class="mt-4">Book Details <span class="text-muted">📖</span></h4>
+            <h4 class="mt-4">Book Details</h4>
             <p>${book.description}</p>
         </div>`;
     $("#book-details-row").html(bookDetails);

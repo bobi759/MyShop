@@ -11,8 +11,11 @@ $(document).ready(function () {
       <div class="col col-lg-9 col-xl-8">
         <div class="card">
           <div class="rounded-top text-white d-flex flex-row" style="background-color: #000; height:200px;">
-            <div class="ms-4 mt-5 d-flex flex-column align-items-center" style="width: 180px; object-fit: cover; z-index: 1;">
-              <img src="${user.profile.profile_picture}" alt="Profile Picture" class="img-thumbnail mt-4 mb-2">
+            <div class="mt-5 d-flex flex-column align-items-center" style="width: 180px; object-fit: cover; z-index: 1; margin-left: -10px;">
+                <img src="${user.profile.profile_picture}" 
+                 alt="Profile Picture" 
+                 class="img-thumbnail mt-4 mb-2"
+                 style="width: 120px; height: 120px; object-fit: cover;">
             </div>
             <div class="ms-3" style="margin-top: 130px;">
               <h5>${user.profile.first_name} ${user.profile.last_name}</h5>
@@ -21,8 +24,9 @@ $(document).ready(function () {
           </div>
           <div class="p-4 text-black bg-body-tertiary">
             <div class="d-flex justify-content-between align-items-center">
-              <button onclick="window.location.href='${details_url}'" type="button" class="btn btn-outline-dark text-body mb-0" style="z-index: 1;">
+              <button onclick="window.location.href='${details_url}'" type="button" class="btn btn-outline-secondary mb-0" style="z-index: 1;">
                 Edit profile
+              </button>          
               </button>
               <div class="d-flex text-center text-body">
                 <div class="me-3">
@@ -72,7 +76,6 @@ function loadUserOrders() {
                 'C': 'Completed',
                 'F': 'Failed',
                 'S': 'Shipped'
-                // add more if you have them in your model
             };
             let ordersHtml = '';
 

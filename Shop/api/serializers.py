@@ -131,6 +131,8 @@ class CartItemListSerializer(serializers.ModelSerializer):
         return cart_item.product.price * cart_item.quantity
 
 
+
+
 class CartItemCreateSerializer(serializers.ModelSerializer):
     product_id = serializers.IntegerField()
 
