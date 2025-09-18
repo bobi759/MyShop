@@ -29,6 +29,7 @@ export const Home = () => {
 
       <ExploreTopGenres />
       <Footer/>
+      some text here
     </>
   );
 };
