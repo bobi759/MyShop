@@ -1,13 +1,9 @@
-import time
 import uuid
 
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator
 from django.db import models
-import json
-from django.db.models import CASCADE
 
-# Create your models here.
 User = get_user_model()
 
 class Genre(models.Model):
@@ -41,7 +37,7 @@ class Book(models.Model):
 
     author = models.CharField(
         max_length= AUTHOR_MAX_LENGTH,
-        default="P Diddy"
+        default="Author"
     )
 
 
@@ -147,7 +143,6 @@ class Order(models.Model):
     ]
 
     placed_at = models.DateTimeField(auto_now_add=True)
-    # Some logic about this needed
     owner = models.ForeignKey(User,on_delete=models.PROTECT)
     order_status = models.CharField(max_length=1,choices=STATUS_CHOICES,default=STATUS_PENDING)
 
