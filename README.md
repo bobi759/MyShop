@@ -13,8 +13,8 @@ This is a very simple e-commerce website built with Django.
 
 ## Tech Stack
 
-- **Frontend:** HTML, CSS, JavaScript  
-- **Backend:** Django, Django REST, Python  
+- **Frontend:** JavaScript, jQuery, Bootstrap, HTML  
+- **Backend:** Django, Django REST, Python
 - **Database:** SQLite
 
 ## Features
