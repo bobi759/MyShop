@@ -83,13 +83,8 @@ Password : SecurePass123
 
 ---
 
-### Cart
-![Cart](./resources/product-order.png)
-
----
-
-### User Details
-![Details](./resources/account-details.png)
+### Books Catalog
+![Books Catalog](./resources/product-details.png)
 
 ---
 
@@ -98,7 +93,12 @@ Password : SecurePass123
 
 ---
 
-### Book Details
-![Details](./resources/products-page.png)
+### User Details
+![Details](./resources/account-details.png)
+
+---
+
+### Cart
+![Cart](./resources/product-order.png)
 
 ---
