@@ -74,3 +74,31 @@ You can use already created account with the following credentials
 Username : Ivanov@gmail.com
 Password : SecurePass123
 ```
+
+
+## Screenshots
+
+### Homepage
+![Home](./resources/home-page.png)
+
+---
+
+### Cart
+![Cart](./resources/product-order.png)
+
+---
+
+### User Details
+![Details](./resources/account-details.png)
+
+---
+
+### Book Details
+![Details](./resources/products-details-page2.png)
+
+---
+
+### Book Details
+![Details](./resources/products-page.png)
+
+---
