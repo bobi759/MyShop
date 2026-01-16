@@ -8,7 +8,6 @@ from Shop.shop_app.models import Genre, Book, Cart, CartItem, Profile, Order, Or
 User = get_user_model()
 
 
-# User Serializers
 
 class ProfileSerializer(ModelSerializer):
     profile_picture = ImageField()
@@ -52,7 +51,6 @@ class CreateUserSerializer(ModelSerializer):
             raise serializers.ValidationError("Passwords do not match.")
 
         validate_password(password)
-        #
         profile_serializer = ProfileSerializer(data=profile_data)
         profile_serializer.is_valid(raise_exception=True)
         return attrs
