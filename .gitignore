@@ -10,3 +10,7 @@ myvenv/
 node_modules/
 build/
 dist/
+
+.idea/
+.vscode/
+*.iml
